@@ -1,0 +1,7 @@
+frontend :
+
+        cd frontend
+        npm install
+        npm run dev
+
+OBS: toda vez que for criar um component use "rafce" vai ajudar muito kkkkkkkkkk

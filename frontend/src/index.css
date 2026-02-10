@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  /* 🎨 Cores personalizadas baseadas nas suas variáveis CSS */
+  --color-primary: var(--primary-color);
+  --color-secondary: var(--secondary-color);
+  --color-dark-bg: var(--dark-bg);
+  --color-light-bg: var(--light-bg);
+  --color-text-dark: var(--text-dark);
+  --color-text-light: var(--text-light);
+  --color-border: var(--border-color);
+
+  /* 🔤 Fonte personalizada */
+  --font-sans:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+
+  /* 📏 Transições */
+  --transition-default: var(--transition);
+}
+
+/* Estilos globais para aplicar as variáveis CSS */
+@layer base {
+  :root {
+    --primary-color: #FFD301; /* Amarelo/Dourado mais claro */
+    --secondary-color: #719A0A; /* Dourado escuro para botões */
+    --dark-bg: #38241B; /* Marrom escuro do header/footer */
+    --light-bg: #f7f4e9; /* Fundo bege/creme */
+    --text-dark: #333;
+    --text-light: #969696;
+    --border-color: #ddd;
+    --transition: all 0.3s ease;
+  }
+}
