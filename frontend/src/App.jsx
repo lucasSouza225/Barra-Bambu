@@ -1,9 +1,14 @@
 import Header from "./components/Header"
+import Carrossel from "./components/home/Carrossel"
 
 function App() {
 
   return (
-   <Header />
+   <div>
+      <Header />
+      <Carrossel />
+      {/* resto do conteúdo */}
+    </div>
   )
 }
 
