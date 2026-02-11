@@ -1,3 +1,8 @@
+-- Configuração do GIT
+        git config --global user.name lucasSouza225
+        git config --global user.email lucas2469y@gmail.com
+
+
 frontend :
 
         cd frontend
@@ -5,3 +10,6 @@ frontend :
         npm run dev
 
 OBS: toda vez que for criar um component use "rafce" vai ajudar muito kkkkkkkkkk
+
+OBS: Abra o PowerShell como Administrador na Etec
+        Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
