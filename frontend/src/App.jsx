@@ -1,14 +1,15 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Header from "./components/Header"
-import Carrossel from "./components/home/Carrossel"
+import Home from "./pages/Home"
 
 function App() {
-
   return (
-   <div>
+    <BrowserRouter>
       <Header />
-      <Carrossel />
-      {/* resto do conteúdo */}
-    </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
