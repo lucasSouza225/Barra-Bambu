@@ -40,11 +40,12 @@ const Cardapio = () => {
         </div>
 
         {/* Grid de itens do menu */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
           {menuItems.map((item) => (
             <div 
               key={item.id}
-              className="relative overflow-hidden rounded-lg h-[250px] cursor-pointer group"
+              className="relative overflow-hidden rounded-lg h-60 cursor-pointer group
+             w-full sm:w-[95%] md:w-full mx-auto"
             >
               {/* Imagem */}
               <img 

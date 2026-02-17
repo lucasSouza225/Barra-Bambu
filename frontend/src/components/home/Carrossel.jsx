@@ -77,7 +77,7 @@ const Carrossel = () => {
             className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out
               ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
           >
-            {/* Imagem de fundo com overlay escuro para melhor contraste do texto */}
+            {/* Imagem de fundo com overlay escuro */}
             <div 
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${slide.image})` }}
@@ -85,17 +85,14 @@ const Carrossel = () => {
               <div className="absolute inset-0 bg-black/40"></div>
             </div>
 
-            {/* Conteúdo do slide */}
+            {/* Apenas título e descrição */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 animate-fade-in-up">
                 {slide.title}
               </h2>
-              <p className="text-lg md:text-xl lg:text-2xl mb-8 max-w-2xl animate-fade-in-up animation-delay-200">
+              <p className="text-lg md:text-xl lg:text-2xl max-w-2xl animate-fade-in-up animation-delay-200">
                 {slide.description}
               </p>
-              <button className="bg-primary hover:bg-primary/90 text-dark-bg font-semibold px-8 py-3 rounded-lg transition-colors duration-300 animate-fade-in-up animation-delay-400">
-                Saiba Mais
-              </button>
             </div>
           </div>
         ))}
@@ -132,7 +129,7 @@ const Carrossel = () => {
         </svg>
       </button>
 
-      {/* Indicadores (dots) */}
+      {/* Apenas os dots indicadores */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-3">
         {slides.map((_, index) => (
           <button
@@ -145,11 +142,6 @@ const Carrossel = () => {
             aria-label={`Ir para slide ${index + 1}`}
           />
         ))}
-      </div>
-
-      {/* Contador de slides */}
-      <div className="absolute bottom-6 right-6 z-20 bg-black/50 text-white px-4 py-2 rounded-full backdrop-blur-sm text-sm">
-        {currentIndex + 1} / {slides.length}
       </div>
     </div>
   );
