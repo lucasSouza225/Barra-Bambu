@@ -2,7 +2,7 @@ import React from 'react';
 
 const Memorias = () => {
   return (
-    <section className="py-20 bg-white text-center">
+    <section className="p-20 bg-white text-center">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl md:text-3xl lg:text-[32px] font-bold text-text-dark mb-5">
           Momentos que ficam na memória

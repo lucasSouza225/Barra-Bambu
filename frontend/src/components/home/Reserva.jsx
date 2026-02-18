@@ -95,7 +95,7 @@ const Reserva = () => {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <section id="reserva" className="py-20 bg-light-bg">
+    <section id="reserva" className="p-20 bg-light-bg">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-12.5 items-center">
           

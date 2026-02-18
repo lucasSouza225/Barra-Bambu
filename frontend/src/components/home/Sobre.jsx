@@ -4,7 +4,7 @@ import welcomeImg from '../../assets/welcome.png';
 
 const Sobre = () => {
   return (
-    <section id="sobre" className="py-16 bg-light-bg">
+    <section id="sobre" className="p-16 bg-light-bg">
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           

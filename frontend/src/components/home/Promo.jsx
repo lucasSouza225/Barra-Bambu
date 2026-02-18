@@ -33,13 +33,14 @@ const Promo = () => {
   ];
 
   return (
-    <section className="py-[60px] bg-light-bg ">
-      <div className="container mx-auto px-4">
+    <section className="p-15 bg-light-bg "
+>
+      <div className="container mx-auto px-4 ">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {promocoes.map((promo) => (
             <div 
               key={promo.id}
-              className="relative overflow-hidden rounded-lg w-[80%] h-[350px] cursor-pointer group mx-auto lg:mx-0"
+              className="relative overflow-hidden rounded-lg w-[95%] h-85 cursor-pointer group mx-auto lg:mx-0"
             >
               {/* Imagem */}
               <img 

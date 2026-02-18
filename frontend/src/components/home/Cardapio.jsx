@@ -29,7 +29,7 @@ const Cardapio = () => {
   ];
 
   return (
-    <section id="cardapio" className="py-20 bg-white">
+    <section id="cardapio" className="p-20 bg-white">
       <div className="container mx-auto px-4">
         
         {/* Título com linha dourada */}

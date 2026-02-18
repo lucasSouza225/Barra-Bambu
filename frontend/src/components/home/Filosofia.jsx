@@ -3,9 +3,9 @@ import philosophyImg from '../../assets/philosophy.jpg';
 
 const Filosofia = () => {
   return (
-    <section className="py-20 bg-white">
+    <section className="p-20 bg-white">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-[50px] items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-12.5 items-center">
           
           {/* Texto */}
           <div className="space-y-5">

@@ -52,7 +52,7 @@ const Galeria = () => {
 
   return (
     <>
-      <section id="galeria" className="py-20 bg-light-bg">
+      <section id="galeria" className="p-20 bg-light-bg">
         <div className="container mx-auto px-4">
           
           {/* Título da seção */}
