@@ -13,3 +13,14 @@ OBS: toda vez que for criar um component use "rafce" vai ajudar muito kkkkkkkkkk
 
 OBS: Abra o PowerShell como Administrador na Etec
         Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+
+backend : 
+         cd backend
+        
+        npm run dev
+
+OBS: para acessar o caminho da api =>  http://localhost:3000/ 
+
+login :
+        email: "BarraBambu@gmail.com"
+        password: "123456"
