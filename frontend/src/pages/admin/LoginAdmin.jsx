@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import {Navigate } from 'react-router-dom';
+import axios from 'axios';
 
-const LoginAdmin = () => {
+const LoginAdmin = ({ setUser }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  const [redirect, setRedirect] = useState(false)
+
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -16,15 +19,13 @@ const LoginAdmin = () => {
       ...prev,
       [id]: value
     }));
-    // Limpa erro quando usuário começa a digitar
     if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Validação básica
+
     if (!formData.email || !formData.password) {
       setError('Preencha todos os campos');
       setLoading(false);
@@ -32,31 +33,37 @@ const LoginAdmin = () => {
     }
 
     try {
-      // Aqui você fará a chamada para sua API
-      // const response = await api.post('/auth/login', formData);
-      // localStorage.setItem('token', response.data.token);
-      // navigate('/admin/dashboard');
-      
-      // Simulando para teste
-      console.log('Login attempt:', formData);
-      
-      // Por enquanto, só simula o redirecionamento
-      // setTimeout(() => {
-      //   navigate('/admin/dashboard');
-      // }, 1000);
-      
+      const { data: userDoc } = await axios.post("/users/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      setUser(userDoc)
+      setRedirect(true)
+      console.log(userDoc);
+
     } catch (error) {
-      setError('Usuário ou senha inválidos');
+      if (error.response) {
+        setError(error.response.data.message || 'Usuário ou senha inválidos');
+      } else if (error.request) {
+        setError('Servidor não respondeu. Tente novamente.');
+      } else {
+        setError('Erro ao fazer login');
+      }
+      console.error('Erro detalhado:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  if (redirect) return <Navigate to="/admin"/>
+    
+  
+
   return (
     <div className="min-h-screen bg-linear-to-br from-dark-bg to-dark-bg/90 flex items-center justify-center p-4">
       <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl w-full max-w-md p-8 border border-primary/20">
-        
-        {/* Logo ou ícone (opcional) */}
+
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center">
             <svg className="w-10 h-10 text-dark-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,18 +80,17 @@ const LoginAdmin = () => {
 
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Campo Usuário */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
               Usuário
             </label>
             <input
-              type="text"
+              type="email"
               id="email"
               value={formData.email}
               onChange={handleChange}
               className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-              placeholder="Digite seu usuário"
+              placeholder="Digite seu e-mail"
               disabled={loading}
             />
           </div>
@@ -116,9 +122,8 @@ const LoginAdmin = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-primary hover:bg-secondary text-dark-bg font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dark-bg ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`w-full bg-primary hover:bg-secondary text-dark-bg font-bold py-3 px-4 rounded-lg transition-all duration-100 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-dark-bg ${loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
           >
             {loading ? (
               <span className="flex items-center justify-center">
@@ -133,8 +138,6 @@ const LoginAdmin = () => {
             )}
           </button>
         </form>
-
-        {/* Link para voltar ao site (opcional) */}
         <div className="mt-6 text-center">
           <a href="/" className="text-sm text-gray-400 hover:text-primary transition-colors">
             ← Voltar para o site
@@ -146,5 +149,3 @@ const LoginAdmin = () => {
 };
 
 export default LoginAdmin;
-
-

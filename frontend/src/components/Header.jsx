@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import logo from '../assets/logo.png'
 
-const Header = () => {
+const Header = ({user}) => {
+  console.log(user)
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -25,7 +26,7 @@ const Header = () => {
           <img 
             src={logo} 
             alt="Logo" 
-            className="w-32 md:w-48" // Corrigido: w-35 não existe no Tailwind
+            className="w-32 md:w-48" 
           />
         </div>
 
