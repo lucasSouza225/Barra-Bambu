@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom'; // Importe o Link
 import logo from '../assets/logo.png'
 
 const Header = ({user}) => {
@@ -9,7 +10,6 @@ const Header = ({user}) => {
     setMenuOpen(!menuOpen);
   };
 
-  // Array para evitar repetição de código
   const navItems = [
     { href: '#sobre', label: 'Sobre' },
     { href: '#cardapio', label: 'Cardápio' },
@@ -22,13 +22,13 @@ const Header = ({user}) => {
     <header className="bg-[#38241B] text-white py-3 sticky top-0 z-50 shadow-lg">
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
-        <div className="logo">
+        <Link to="/" className="logo">
           <img 
             src={logo} 
             alt="Logo" 
-            className="w-32 md:w-48" 
+            className="w-32 md:w-48 cursor-pointer hover:opacity-80 transition-opacity" 
           />
-        </div>
+        </Link>
 
         {/* Hamburger Menu Button (Mobile) */}
         <button 
