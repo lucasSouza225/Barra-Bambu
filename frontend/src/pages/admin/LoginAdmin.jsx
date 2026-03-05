@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import {Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';;
 import axios from 'axios';
 
 const LoginAdmin = ({ setUser }) => {
@@ -9,9 +9,27 @@ const LoginAdmin = ({ setUser }) => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const [redirect, setRedirect] = useState(false)
+  const [checkingLogin, setCheckingLogin] = useState(true);
 
+  
+  useEffect(() => {
+    const verificarLogin = async () => {
+      try {
+        const { data } = await axios.get('/users/profile');
+        if (data) {
+          setUser(data);
+          setRedirect(true);
+        }
+      } catch (error) {
+        console.log('Usuário não está logado');
+      } finally {
+        setCheckingLogin(false);
+      }
+    };
+
+    verificarLogin();
+  }, [setUser]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -38,9 +56,8 @@ const LoginAdmin = ({ setUser }) => {
         password: formData.password,
       });
 
-      setUser(userDoc)
-      setRedirect(true)
-      console.log(userDoc);
+      setUser(userDoc);
+      setRedirect(true);
 
     } catch (error) {
       if (error.response) {
@@ -56,10 +73,18 @@ const LoginAdmin = ({ setUser }) => {
     }
   };
 
-  if (redirect) return <Navigate to="/admin"/>
-    
-  
+  if (checkingLogin) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-dark-bg to-dark-bg/90 flex items-center justify-center">
+        <div className="text-white text-xl">Verificando login...</div>
+      </div>
+    );
+  }
 
+  if (redirect) {
+    return <Navigate to="/admin" />;
+  }
+    
   return (
     <div className="min-h-screen bg-linear-to-br from-dark-bg to-dark-bg/90 flex items-center justify-center p-4">
       <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl w-full max-w-md p-8 border border-primary/20">

@@ -12,24 +12,40 @@ import ProtegerRotaAdmin from "./components/admin/ProtegerRotaAdmin"
 import axios from "axios"
 import { useState } from "react"
 import { StrictMode } from "react"
+import { useEffect } from "react"
 
 axios.defaults.baseURL = import.meta.env.VITE_AXIOS_BASE_URL
+axios.defaults.withCredentials = true
 
 console.log(import.meta.env)
 
 function App() {
   const [user, setUser] = useState(null)
+const [loading, setLoading] = useState(true) 
+
+useEffect(() => {
+  const verificarLogin = async () => {
+    try {
+      const { data } = await axios.get('/users/profile')
+      setUser(data)
+    } catch (error) {
+      setUser(null)
+    } finally {
+      setLoading(false) 
+    }
+  }
+  
+  verificarLogin()
+}, []);
+if (loading) return <div>Carregando...</div>
 
   return (
     <BrowserRouter>
       <StrictMode>
-        <Header user={user}/>
+        <Header user={user} />
         <Routes>
-          {/* Rotas públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginAdmin setUser={setUser} />} />
-          
-          {/* Rotas protegidas do admin */}
           <Route path="/admin" element={
             <ProtegerRotaAdmin user={user}>
               <LayoutAdmin user={user} setUser={setUser} />

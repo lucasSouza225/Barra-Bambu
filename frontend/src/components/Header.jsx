@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom'; // Importe o Link
 import logo from '../assets/logo.png'
 
-const Header = ({user}) => {
-  console.log(user)
+const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => {
