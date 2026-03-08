@@ -10,6 +10,11 @@ const CardapioAdmin = () => {
   const [editandoId, setEditandoId] = useState(null);
   const [termoBusca, setTermoBusca] = useState('');
   
+  // NOVOS STATES PARA UPLOAD
+  const [imagemFile, setImagemFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
+
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
@@ -17,7 +22,8 @@ const CardapioAdmin = () => {
     categoria: 'principais',
     subcategoria: '',
     destaque: false,
-    disponivel: true
+    disponivel: true,
+    imagem: '' // NOVO CAMPO
   });
 
   useEffect(() => {
@@ -67,16 +73,46 @@ const CardapioAdmin = () => {
     }));
   };
 
+  // NOVA FUNÇÃO PARA LIDAR COM SELEÇÃO DE IMAGEM
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagemFile(file);
+      // Criar preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // MODIFICAR O handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setUploading(true);
     
     try {
-      if (editandoId) {
-        await cardapioService.atualizar(editandoId, formData);
-      } else {
-        await cardapioService.criar(formData);
+      let imagemUrl = formData.imagem || '';
+      
+      // Se tiver imagem nova, faz upload primeiro
+      if (imagemFile) {
+        const uploadResult = await cardapioService.uploadImagem(imagemFile);
+        imagemUrl = uploadResult.url;
       }
       
+      const itemData = {
+        ...formData,
+        imagem: imagemUrl
+      };
+      
+      if (editandoId) {
+        await cardapioService.atualizar(editandoId, itemData);
+      } else {
+        await cardapioService.criar(itemData);
+      }
+      
+      // Reset
       await carregarItens();
       setFormData({
         nome: '',
@@ -85,8 +121,11 @@ const CardapioAdmin = () => {
         categoria: 'principais',
         subcategoria: '',
         destaque: false,
-        disponivel: true
+        disponivel: true,
+        imagem: ''
       });
+      setImagemFile(null);
+      setPreviewUrl('');
       setEditandoId(null);
       setMostrarForm(false);
       setTermoBusca(''); 
@@ -94,6 +133,8 @@ const CardapioAdmin = () => {
     } catch (error) {
       setError('Erro ao salvar item');
       console.error(error);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -105,10 +146,14 @@ const CardapioAdmin = () => {
       categoria: item.categoria,
       subcategoria: item.subcategoria || '',
       destaque: item.destaque || false,
-      disponivel: item.disponivel !== false
+      disponivel: item.disponivel !== false,
+      imagem: item.imagem || '' // NOVO
     });
     setEditandoId(item._id);
     setMostrarForm(true);
+    // Limpar preview quando for editar
+    setPreviewUrl('');
+    setImagemFile(null);
   };
 
   const handleDelete = async (id) => {
@@ -137,6 +182,24 @@ const CardapioAdmin = () => {
     setTermoBusca('');
   };
 
+  // FUNÇÃO PARA FECHAR FORM E LIMPAR TUDO
+  const fecharForm = () => {
+    setMostrarForm(false);
+    setEditandoId(null);
+    setFormData({
+      nome: '',
+      descricao: '',
+      preco: '',
+      categoria: 'principais',
+      subcategoria: '',
+      destaque: false,
+      disponivel: true,
+      imagem: ''
+    });
+    setImagemFile(null);
+    setPreviewUrl('');
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -151,17 +214,24 @@ const CardapioAdmin = () => {
         <h1 className="text-3xl font-bold text-dark-bg">Gerenciar Cardápio</h1>
         <button
           onClick={() => {
-            setMostrarForm(!mostrarForm);
-            setEditandoId(null);
-            setFormData({
-              nome: '',
-              descricao: '',
-              preco: '',
-              categoria: 'principais',
-              subcategoria: '',
-              destaque: false,
-              disponivel: true
-            });
+            if (mostrarForm) {
+              fecharForm();
+            } else {
+              setMostrarForm(true);
+              setEditandoId(null);
+              setFormData({
+                nome: '',
+                descricao: '',
+                preco: '',
+                categoria: 'principais',
+                subcategoria: '',
+                destaque: false,
+                disponivel: true,
+                imagem: ''
+              });
+              setImagemFile(null);
+              setPreviewUrl('');
+            }
           }}
           className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors"
         >
@@ -196,7 +266,6 @@ const CardapioAdmin = () => {
           )}
         </div>
         
-        {/* Mostrar resultado da busca */}
         <div className="mt-2 text-sm text-gray-500">
           {termoBusca ? (
             <p>
@@ -217,7 +286,7 @@ const CardapioAdmin = () => {
           </h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* ... formulário existente ... */}
+            {/* Nome */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nome do prato *
@@ -232,6 +301,7 @@ const CardapioAdmin = () => {
               />
             </div>
 
+            {/* Descrição */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Descrição *
@@ -246,6 +316,7 @@ const CardapioAdmin = () => {
               />
             </div>
 
+            {/* Preço e Categoria */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -285,6 +356,7 @@ const CardapioAdmin = () => {
               </div>
             </div>
 
+            {/* Subcategoria */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Subcategoria
@@ -299,6 +371,39 @@ const CardapioAdmin = () => {
               />
             </div>
 
+            {/* Campo de imagem - NOVO */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Imagem do prato
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-primary"
+              />
+              {previewUrl && (
+                <div className="mt-2">
+                  <img 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    className="w-32 h-32 object-cover rounded-lg border"
+                  />
+                </div>
+              )}
+              {formData.imagem && !previewUrl && (
+                <div className="mt-2">
+                  <img 
+                    src={formData.imagem} 
+                    alt="Atual" 
+                    className="w-32 h-32 object-cover rounded-lg border"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Imagem atual</p>
+                </div>
+              )}
+            </div>
+
+            {/* Checkboxes */}
             <div className="flex gap-6">
               <label className="flex items-center">
                 <input
@@ -323,16 +428,18 @@ const CardapioAdmin = () => {
               </label>
             </div>
 
+            {/* Botões */}
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors"
+                disabled={uploading}
+                className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50"
               >
-                {editandoId ? 'Atualizar' : 'Salvar'}
+                {uploading ? 'Enviando...' : (editandoId ? 'Atualizar' : 'Salvar')}
               </button>
               <button
                 type="button"
-                onClick={() => setMostrarForm(false)}
+                onClick={fecharForm}
                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
               >
                 Cancelar
@@ -347,6 +454,7 @@ const CardapioAdmin = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
+              <th className="p-3 text-left">Imagem</th> {/* NOVA COLUNA */}
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Nome</th>
               <th className="p-3 text-left">Categoria</th>
@@ -358,6 +466,20 @@ const CardapioAdmin = () => {
           <tbody>
             {itensFiltrados.map((item) => (
               <tr key={item._id} className="border-t hover:bg-gray-50">
+                {/* Coluna da imagem */}
+                <td className="p-3">
+                  {item.imagem ? (
+                    <img 
+                      src={item.imagem} 
+                      alt={item.nome}
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400">
+                      Sem img
+                    </div>
+                  )}
+                </td>
                 <td className="p-3">
                   <button
                     onClick={() => handleToggleDisponivel(item._id)}

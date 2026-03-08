@@ -2,6 +2,7 @@
 import axios from 'axios';
 
 const API_URL = '/cardapio';
+const UPLOAD_URL = '/upload';
 
 export const cardapioService = {
   // Listar todos os itens
@@ -37,6 +38,19 @@ export const cardapioService = {
   // Alternar disponibilidade
   toggleDisponivel: async (id) => {
     const response = await axios.patch(`${API_URL}/${id}/disponivel`);
+    return response.data;
+  },
+
+  // Upload de imagem
+  uploadImagem: async (file) => {
+    const formData = new FormData();
+    formData.append('imagem', file);
+    
+    const response = await axios.post(UPLOAD_URL, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return response.data;
   }
 };
