@@ -25,13 +25,13 @@ const Cardapio = () => {
     { id: 6, imagem: menu6, titulo: 'Bebida Especial' },
     { id: 7, imagem: menu7, titulo: 'Entrada' },
     { id: 8, imagem: menu8, titulo: 'Bebida Refrescante' },
-    
+
   ];
 
   return (
     <section id="cardapio" className="p-20 bg-white">
       <div className="container mx-auto px-4">
-        
+
         {/* Título com linha dourada */}
         <div className="text-center mb-12">
           <h2 className="font-['Georgia',serif] text-4xl text-dark-bg inline-block pb-3 border-b-2 border-primary">
@@ -42,18 +42,18 @@ const Cardapio = () => {
         {/* Grid de itens do menu */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
           {menuItems.map((item) => (
-            <div 
+            <div
               key={item.id}
               className="relative overflow-hidden rounded-lg h-60 cursor-pointer group
              w-full sm:w-[95%] md:w-full mx-auto"
             >
               {/* Imagem */}
-              <img 
-                src={item.imagem} 
+              <img
+                src={item.imagem}
                 alt={item.titulo}
                 className="w-full h-full object-cover transition-all duration-300 group-hover:scale-115 group-hover:rotate-2"
               />
-              
+
               {/* Overlay padrão (preto) */}
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:bg-[#4B2E20]/70">
                 <p className="text-white text-lg font-bold text-center px-4">
@@ -66,7 +66,7 @@ const Cardapio = () => {
 
         {/* Botão Ver Cardápio */}
         <div className="text-center">
-          <Link to="/cardapio">
+          <Link to="/cardapio-publico">
             <button className="bg-primary text-dark-bg font-bold px-10 py-4 rounded-md cursor-pointer transition-all duration-300 shadow-md hover:bg-secondary hover:text-white hover:-translate-y-0.5 hover:shadow-xl">
               Ver Cardápio
             </button>

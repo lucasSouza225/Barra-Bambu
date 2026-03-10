@@ -9,6 +9,9 @@ import CardapioAdmin from "./pages/admin/CardapioAdmin"
 import GaleriaAdmin from "./pages/admin/GaleriaAdmin"
 import CarrosselAdmin from "./pages/admin/CarrosselAdmin"
 import ProtegerRotaAdmin from "./components/admin/ProtegerRotaAdmin"
+import { CarrinhoProvider } from "./contexts/carrinho/CarrinhoContext" 
+import CarrinhoLateral from "./components/carrinho/CarrinhoLateral" 
+import CardapioPublico from './pages/CardapioPublico';
 import axios from "axios"
 import { useState } from "react"
 import { StrictMode } from "react"
@@ -21,43 +24,46 @@ console.log(import.meta.env)
 
 function App() {
   const [user, setUser] = useState(null)
-const [loading, setLoading] = useState(true) 
 
-useEffect(() => {
-  const verificarLogin = async () => {
-    try {
-      const { data } = await axios.get('/users/profile')
-      setUser(data)
-    } catch (error) {
-      setUser(null)
-    } finally {
-      setLoading(false) 
+  useEffect(() => {
+    const axiosGet = async () => {
+      try {
+        const { data } = await axios.get('/users/profile')
+        setUser(data)
+      } catch (error) {
+        console.log('Usuário não logado')
+        setUser(null)
+      }
     }
-  }
-  
-  verificarLogin()
-}, []);
-if (loading) return <div>Carregando...</div>
+    axiosGet()
+  }, [])
 
   return (
     <BrowserRouter>
       <StrictMode>
-        <Header user={user} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginAdmin setUser={setUser} />} />
-          <Route path="/admin" element={
-            <ProtegerRotaAdmin user={user}>
-              <LayoutAdmin user={user} setUser={setUser} />
-            </ProtegerRotaAdmin>
-          }>
-            <Route index element={<DashboardAdmin />} />
-            <Route path="cardapio" element={<CardapioAdmin />} />
-            <Route path="galeria" element={<GaleriaAdmin />} />
-            <Route path="carrossel" element={<CarrosselAdmin />} />
-          </Route>
-        </Routes>
-        <Footer />
+        <CarrinhoProvider> 
+          <Header user={user} />
+          <CarrinhoLateral /> 
+          <Routes>
+            {/* Rotas PÚBLICAS */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<LoginAdmin setUser={setUser} />} />
+            <Route path="/cardapio-publico" element={<CardapioPublico />} /> {/* ← AQUI! Fora do admin */}
+            
+            {/* Rotas ADMIN (protegidas) */}
+            <Route path="/admin" element={
+              <ProtegerRotaAdmin user={user}>
+                <LayoutAdmin user={user} setUser={setUser} />
+              </ProtegerRotaAdmin>
+            }>
+              <Route index element={<DashboardAdmin />} />
+              <Route path="cardapio" element={<CardapioAdmin />} />
+              <Route path="galeria" element={<GaleriaAdmin />} />
+              <Route path="carrossel" element={<CarrosselAdmin />} />
+            </Route>
+          </Routes>
+          <Footer />
+        </CarrinhoProvider>
       </StrictMode>
     </BrowserRouter>
   )

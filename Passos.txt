@@ -15,8 +15,9 @@ OBS: Abra o PowerShell como Administrador na Etec
         Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 backend : 
-         cd backend
-        
+        cd backend
+        npm install dotenv
+        npm install jsonwebtoken
         npm run dev
 
 OBS: para acessar o caminho da api =>  http://localhost:3000/ 
