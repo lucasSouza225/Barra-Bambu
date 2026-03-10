@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react';
 import { cardapioService } from '../service/cardapioService';
 import { useCarrinho } from '../contexts/carrinho/CarrinhoContext';
+import { 
+  FiCoffee, FiHome, FiStar 
+} from 'react-icons/fi';
+import { 
+  IoRestaurant, IoFastFood, IoFish, IoWine, IoIceCream, IoClose 
+} from 'react-icons/io5';
+import { 
+  MdRestaurant, MdRestaurantMenu, MdLocalPizza, MdAdd 
+} from 'react-icons/md';
+import { FaUtensils, FaCookieBite } from 'react-icons/fa';
 
 const CardapioPublico = () => {
   const [itens, setItens] = useState([]);
@@ -14,14 +24,14 @@ const CardapioPublico = () => {
   const { adicionarItem } = useCarrinho();
 
   const categorias = [
-    { id: 'todos', nome: 'Todos', icon: '🍽️' },
-    { id: 'entradas', nome: 'Entradas', icon: '🥗' },
-    { id: 'principais', nome: 'Pratos Principais', icon: '🍖' },
-    { id: 'carnes', nome: 'Carnes', icon: '🥩' },
-    { id: 'peixes', nome: 'Peixes', icon: '🐟' },
-    { id: 'bebidas', nome: 'Bebidas', icon: '🍺' },
-    { id: 'sobremesas', nome: 'Sobremesas', icon: '🍰' },
-    { id: 'petiscos', nome: 'Petiscos', icon: '🍟' },
+    { id: 'todos', nome: 'Todos', icon: <MdRestaurantMenu /> },
+    { id: 'entradas', nome: 'Entradas', icon: <FaUtensils /> },
+    { id: 'principais', nome: 'Pratos Principais', icon: <IoRestaurant /> },
+    { id: 'carnes', nome: 'Carnes', icon: <MdRestaurant /> },
+    { id: 'peixes', nome: 'Peixes', icon: <IoFish /> },
+    { id: 'bebidas', nome: 'Bebidas', icon: <IoWine /> },
+    { id: 'sobremesas', nome: 'Sobremesas', icon: <IoIceCream /> },
+    { id: 'petiscos', nome: 'Petiscos', icon: <MdLocalPizza /> },
   ];
 
   useEffect(() => {
@@ -78,7 +88,7 @@ const CardapioPublico = () => {
   }
 
   return (
-    <div className="min-h-screen bg-light-bg py-16">
+    <div className="min-h-screen bg-light-bg p-8">
       <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold text-center text-dark-bg mb-12">
           Nosso Cardápio Completo
@@ -90,13 +100,13 @@ const CardapioPublico = () => {
             <button
               key={cat.id}
               onClick={() => setCategoriaAtiva(cat.id)}
-              className={`px-6 py-3 rounded-full transition-all duration-300 ${
+              className={`px-6 py-3 rounded-full transition-all duration-300 flex items-center gap-2 ${
                 categoriaAtiva === cat.id
                   ? 'bg-primary text-dark-bg font-bold shadow-lg scale-105'
                   : 'bg-white text-gray-600 hover:bg-primary/20'
               }`}
             >
-              <span className="mr-2">{cat.icon}</span>
+              <span className="text-lg">{cat.icon}</span>
               {cat.nome}
             </button>
           ))}
@@ -117,8 +127,8 @@ const CardapioPublico = () => {
                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                    <span className="text-6xl">🍽️</span>
+                  <div className="w-full h-full bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                    <IoRestaurant className="text-6xl text-primary/50" />
                   </div>
                 )}
               </div>
@@ -129,8 +139,9 @@ const CardapioPublico = () => {
                     {item.nome}
                   </h3>
                   {item.destaque && (
-                    <span className="bg-primary text-dark-bg text-xs px-2 py-1 rounded-full">
-                      ⭐ Destaque
+                    <span className="bg-primary text-dark-bg text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                      <FiStar className="text-xs" />
+                      Destaque
                     </span>
                   )}
                 </div>
@@ -147,7 +158,7 @@ const CardapioPublico = () => {
                     onClick={() => abrirModal(item)}
                     className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors flex items-center gap-2"
                   >
-                    <span>➕</span>
+                    <MdAdd className="text-lg" />
                     Adicionar
                   </button>
                 </div>
@@ -225,7 +236,7 @@ const CardapioPublico = () => {
                 onClick={() => setModalAberto(false)}
                 className="px-4 py-3 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors"
               >
-                ✕
+                <IoClose className="text-2xl" />
               </button>
             </div>
           </div>

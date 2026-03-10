@@ -1,5 +1,23 @@
 import { useState, useEffect } from 'react';
 import { cardapioService } from '../../service/cardapioService';
+import { 
+  FiSearch, 
+  FiX, 
+  FiStar, 
+  FiEdit, 
+  FiTrash2, 
+  FiPlus,
+  FiImage 
+} from 'react-icons/fi';
+import { 
+  IoRestaurant, 
+  IoClose,
+  IoSave 
+} from 'react-icons/io5';
+import { 
+  MdVisibility, 
+  MdVisibilityOff 
+} from 'react-icons/md';
 
 const CardapioAdmin = () => {
   const [itens, setItens] = useState([]);
@@ -10,7 +28,6 @@ const CardapioAdmin = () => {
   const [editandoId, setEditandoId] = useState(null);
   const [termoBusca, setTermoBusca] = useState('');
   
-  // NOVOS STATES PARA UPLOAD
   const [imagemFile, setImagemFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -23,7 +40,7 @@ const CardapioAdmin = () => {
     subcategoria: '',
     destaque: false,
     disponivel: true,
-    imagem: '' // NOVO CAMPO
+    imagem: ''
   });
 
   useEffect(() => {
@@ -73,12 +90,10 @@ const CardapioAdmin = () => {
     }));
   };
 
-  // NOVA FUNÇÃO PARA LIDAR COM SELEÇÃO DE IMAGEM
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImagemFile(file);
-      // Criar preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result);
@@ -87,7 +102,6 @@ const CardapioAdmin = () => {
     }
   };
 
-  // MODIFICAR O handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUploading(true);
@@ -95,7 +109,6 @@ const CardapioAdmin = () => {
     try {
       let imagemUrl = formData.imagem || '';
       
-      // Se tiver imagem nova, faz upload primeiro
       if (imagemFile) {
         const uploadResult = await cardapioService.uploadImagem(imagemFile);
         imagemUrl = uploadResult.url;
@@ -112,7 +125,6 @@ const CardapioAdmin = () => {
         await cardapioService.criar(itemData);
       }
       
-      // Reset
       await carregarItens();
       setFormData({
         nome: '',
@@ -147,11 +159,10 @@ const CardapioAdmin = () => {
       subcategoria: item.subcategoria || '',
       destaque: item.destaque || false,
       disponivel: item.disponivel !== false,
-      imagem: item.imagem || '' // NOVO
+      imagem: item.imagem || ''
     });
     setEditandoId(item._id);
     setMostrarForm(true);
-    // Limpar preview quando for editar
     setPreviewUrl('');
     setImagemFile(null);
   };
@@ -182,7 +193,6 @@ const CardapioAdmin = () => {
     setTermoBusca('');
   };
 
-  // FUNÇÃO PARA FECHAR FORM E LIMPAR TUDO
   const fecharForm = () => {
     setMostrarForm(false);
     setEditandoId(null);
@@ -203,6 +213,7 @@ const CardapioAdmin = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
+        <IoRestaurant className="text-4xl text-primary animate-pulse mr-2" />
         <div className="text-xl">Carregando cardápio...</div>
       </div>
     );
@@ -211,7 +222,10 @@ const CardapioAdmin = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-dark-bg">Gerenciar Cardápio</h1>
+        <h1 className="text-3xl font-bold text-dark-bg flex items-center gap-2">
+          <IoRestaurant className="text-primary" />
+          Gerenciar Cardápio
+        </h1>
         <button
           onClick={() => {
             if (mostrarForm) {
@@ -233,14 +247,16 @@ const CardapioAdmin = () => {
               setPreviewUrl('');
             }
           }}
-          className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors"
+          className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors flex items-center gap-2"
         >
-          {mostrarForm ? 'Cancelar' : '+ Novo Item'}
+          {mostrarForm ? <IoClose /> : <FiPlus />}
+          {mostrarForm ? 'Cancelar' : 'Novo Item'}
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center gap-2">
+          <FiX />
           {error}
         </div>
       )}
@@ -248,6 +264,7 @@ const CardapioAdmin = () => {
       {/* BARRA DE PESQUISA */}
       <div className="mb-6">
         <div className="relative">
+          <FiSearch className="absolute left-3 top-3 text-gray-400" />
           <input
             type="text"
             placeholder="Buscar por nome, descrição ou categoria..."
@@ -255,13 +272,12 @@ const CardapioAdmin = () => {
             onChange={(e) => setTermoBusca(e.target.value)}
             className="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
           />
-          <span className="absolute left-3 top-3 text-gray-400">🔍</span>
           {termoBusca && (
             <button
               onClick={limparBusca}
               className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
             >
-              ✕
+              <FiX />
             </button>
           )}
         </div>
@@ -281,12 +297,12 @@ const CardapioAdmin = () => {
       {/* Formulário */}
       {mostrarForm && (
         <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-          <h2 className="text-xl font-bold mb-4">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            {editandoId ? <FiEdit /> : <FiPlus />}
             {editandoId ? 'Editar Item' : 'Novo Item'}
           </h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Nome */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nome do prato *
@@ -301,7 +317,6 @@ const CardapioAdmin = () => {
               />
             </div>
 
-            {/* Descrição */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Descrição *
@@ -316,7 +331,6 @@ const CardapioAdmin = () => {
               />
             </div>
 
-            {/* Preço e Categoria */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -356,7 +370,6 @@ const CardapioAdmin = () => {
               </div>
             </div>
 
-            {/* Subcategoria */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Subcategoria
@@ -371,7 +384,6 @@ const CardapioAdmin = () => {
               />
             </div>
 
-            {/* Campo de imagem - NOVO */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Imagem do prato
@@ -397,15 +409,19 @@ const CardapioAdmin = () => {
                     src={formData.imagem} 
                     alt="Atual" 
                     className="w-32 h-32 object-cover rounded-lg border"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<div class="w-32 h-32 bg-gray-200 rounded flex items-center justify-center"><FiImage class="text-gray-400 text-2xl" /></div>';
+                    }}
                   />
                   <p className="text-xs text-gray-500 mt-1">Imagem atual</p>
                 </div>
               )}
             </div>
 
-            {/* Checkboxes */}
             <div className="flex gap-6">
-              <label className="flex items-center">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   name="destaque"
@@ -413,10 +429,11 @@ const CardapioAdmin = () => {
                   onChange={handleChange}
                   className="h-4 w-4 text-primary rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">Destacar no cardápio</span>
+                <FiStar className={formData.destaque ? 'text-yellow-500' : 'text-gray-400'} />
+                <span className="text-sm text-gray-700">Destacar no cardápio</span>
               </label>
 
-              <label className="flex items-center">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   name="disponivel"
@@ -424,24 +441,36 @@ const CardapioAdmin = () => {
                   onChange={handleChange}
                   className="h-4 w-4 text-primary rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">Disponível</span>
+                {formData.disponivel ? (
+                  <MdVisibility className="text-green-500" />
+                ) : (
+                  <MdVisibilityOff className="text-red-500" />
+                )}
+                <span className="text-sm text-gray-700">Disponível</span>
               </label>
             </div>
 
-            {/* Botões */}
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={uploading}
-                className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50"
+                className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {uploading ? 'Enviando...' : (editandoId ? 'Atualizar' : 'Salvar')}
+                {uploading ? (
+                  'Enviando...'
+                ) : (
+                  <>
+                    <IoSave />
+                    {editandoId ? 'Atualizar' : 'Salvar'}
+                  </>
+                )}
               </button>
               <button
                 type="button"
                 onClick={fecharForm}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors flex items-center gap-2"
               >
+                <IoClose />
                 Cancelar
               </button>
             </div>
@@ -454,7 +483,7 @@ const CardapioAdmin = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="p-3 text-left">Imagem</th> {/* NOVA COLUNA */}
+              <th className="p-3 text-left">Imagem</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Nome</th>
               <th className="p-3 text-left">Categoria</th>
@@ -466,29 +495,34 @@ const CardapioAdmin = () => {
           <tbody>
             {itensFiltrados.map((item) => (
               <tr key={item._id} className="border-t hover:bg-gray-50">
-                {/* Coluna da imagem */}
                 <td className="p-3">
                   {item.imagem ? (
                     <img 
                       src={item.imagem} 
                       alt={item.nome}
                       className="w-12 h-12 object-cover rounded"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"><FiImage class="text-gray-400" /></div>';
+                      }}
                     />
                   ) : (
-                    <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400">
-                      Sem img
+                    <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                      <FiImage className="text-gray-400" />
                     </div>
                   )}
                 </td>
                 <td className="p-3">
                   <button
                     onClick={() => handleToggleDisponivel(item._id)}
-                    className={`px-2 py-1 rounded text-sm ${
+                    className={`px-2 py-1 rounded text-sm flex items-center gap-1 ${
                       item.disponivel 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-red-100 text-red-700'
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                        : 'bg-red-100 text-red-700 hover:bg-red-200'
                     }`}
                   >
+                    {item.disponivel ? <MdVisibility /> : <MdVisibilityOff />}
                     {item.disponivel ? 'Disponível' : 'Indisponível'}
                   </button>
                 </td>
@@ -496,23 +530,23 @@ const CardapioAdmin = () => {
                 <td className="p-3 capitalize">{item.categoria}</td>
                 <td className="p-3">R$ {item.preco.toFixed(2)}</td>
                 <td className="p-3">
-                  {item.destaque && '⭐'}
+                  {item.destaque && <FiStar className="text-yellow-500" />}
                 </td>
                 <td className="p-3">
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(item)}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
                       title="Editar"
                     >
-                      ✏️
+                      <FiEdit />
                     </button>
                     <button
                       onClick={() => handleDelete(item._id)}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors"
                       title="Excluir"
                     >
-                      🗑️
+                      <FiTrash2 />
                     </button>
                   </div>
                 </td>
@@ -525,6 +559,7 @@ const CardapioAdmin = () => {
           <div className="text-center py-12">
             {termoBusca ? (
               <>
+                <FiSearch className="text-5xl text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500 mb-2">Nenhum item encontrado para "{termoBusca}"</p>
                 <button
                   onClick={limparBusca}
@@ -534,7 +569,10 @@ const CardapioAdmin = () => {
                 </button>
               </>
             ) : (
-              <p className="text-gray-500">Nenhum item cadastrado</p>
+              <>
+                <FiImage className="text-5xl text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">Nenhum item cadastrado</p>
+              </>
             )}
           </div>
         )}

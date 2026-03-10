@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { IoImageOutline } from 'react-icons/io5';
+import { MdDelete, MdVisibility, MdVisibilityOff } from 'react-icons/md';
+import { FiPlus } from 'react-icons/fi';
 
 const GaleriaAdmin = () => {
   const [mostrarForm, setMostrarForm] = useState(false);
@@ -12,19 +15,19 @@ const GaleriaAdmin = () => {
     {
       id: 2,
       titulo: 'Área Externa',
-      imagem: 'https://via.placeholder.com/300x200/719A0A/FFFFFF?text=Area+Externa',
+      imagem: '',
       ativo: true
     },
     {
       id: 3,
       titulo: 'Espaço para Eventos',
-      imagem: 'https://via.placeholder.com/300x200/FFD301/38241B?text=Eventos',
+      imagem: '',
       ativo: false
     },
     {
       id: 4,
       titulo: 'Happy Hour',
-      imagem: 'https://via.placeholder.com/300x200/2ECC71/FFFFFF?text=Happy+Hour',
+      imagem: '',
       ativo: true
     }
   ]);
@@ -46,11 +49,10 @@ const GaleriaAdmin = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Cria nova imagem com ID temporário
     const nova = {
       ...novaImagem,
-      id: Date.now(), // ID único temporário
-      imagem: novaImagem.imagem || 'https://via.placeholder.com/300x200/CCCCCC/FFFFFF?text=Nova+Imagem'
+      id: Date.now(),
+      imagem: novaImagem.imagem // Agora pode ser vazio
     };
     
     setImagens([...imagens, nova]);
@@ -76,9 +78,9 @@ const GaleriaAdmin = () => {
         <h1 className="text-3xl font-bold text-dark-bg">Gerenciar Galeria</h1>
         <button
           onClick={() => setMostrarForm(!mostrarForm)}
-          className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors"
+          className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors flex items-center gap-2"
         >
-          {mostrarForm ? 'Cancelar' : '+ Nova Imagem'}
+          {mostrarForm ? 'Cancelar' : <><FiPlus /> Nova Imagem</>}
         </button>
       </div>
 
@@ -115,7 +117,7 @@ const GaleriaAdmin = () => {
                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Deixe em branco para usar imagem placeholder
+                Deixe em branco para usar ícone padrão
               </p>
             </div>
 
@@ -155,40 +157,57 @@ const GaleriaAdmin = () => {
       {/* Grid de imagens */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {imagens.map((img) => (
-          <div key={img.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="relative">
-              <img 
-                src={img.imagem} 
-                alt={img.titulo}
-                className="w-full h-48 object-cover"
-              />
-              {!img.ativo && (
-                <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                  Inativo
+          <div key={img.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            <div className="relative h-48 bg-gray-100">
+              {img.imagem ? (
+                <img 
+                  src={img.imagem} 
+                  alt={img.titulo}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center"><IoImageOutline class="text-4xl text-gray-400" /></div>';
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <IoImageOutline className="text-6xl text-gray-400" />
                 </div>
               )}
+              
+              {/* Badge de status */}
+              <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs flex items-center gap-1 ${
+                img.ativo 
+                  ? 'bg-green-500 text-white' 
+                  : 'bg-gray-500 text-white'
+              }`}>
+                {img.ativo ? <MdVisibility /> : <MdVisibilityOff />}
+                {img.ativo ? 'Ativo' : 'Inativo'}
+              </div>
             </div>
             
             <div className="p-4">
-              <h3 className="font-bold text-dark-bg mb-2">{img.titulo}</h3>
+              <h3 className="font-bold text-dark-bg mb-3">{img.titulo}</h3>
               
               <div className="flex justify-between items-center">
                 <button
                   onClick={() => toggleAtivo(img.id)}
-                  className={`text-sm px-3 py-1 rounded ${
+                  className={`text-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
                     img.ativo 
                       ? 'bg-green-100 text-green-700 hover:bg-green-200' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {img.ativo ? 'Ativo' : 'Inativo'}
+                  {img.ativo ? 'Desativar' : 'Ativar'}
                 </button>
                 
                 <button
                   onClick={() => deletarImagem(img.id)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                  title="Remover"
                 >
-                  🗑️ Remover
+                  <MdDelete className="text-xl" />
                 </button>
               </div>
             </div>
@@ -198,6 +217,7 @@ const GaleriaAdmin = () => {
 
       {imagens.length === 0 && (
         <div className="text-center py-12 bg-white rounded-lg">
+          <IoImageOutline className="text-6xl text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500">Nenhuma imagem cadastrada</p>
         </div>
       )}

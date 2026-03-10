@@ -14,7 +14,6 @@ export const CarrinhoProvider = ({ children }) => {
   const [itensCarrinho, setItensCarrinho] = useState([]);
   const [observacoes, setObservacoes] = useState('');
 
-  // Adicionar item ao carrinho
   const adicionarItem = (item, quantidade = 1) => {
     setItensCarrinho(prev => {
       const existe = prev.find(i => i._id === item._id);
@@ -31,12 +30,10 @@ export const CarrinhoProvider = ({ children }) => {
     });
   };
 
-  // Remover item do carrinho
   const removerItem = (itemId) => {
     setItensCarrinho(prev => prev.filter(i => i._id !== itemId));
   };
 
-  // Atualizar quantidade
   const atualizarQuantidade = (itemId, novaQuantidade) => {
     if (novaQuantidade <= 0) {
       removerItem(itemId);
@@ -52,19 +49,16 @@ export const CarrinhoProvider = ({ children }) => {
     );
   };
 
-  // Limpar carrinho
   const limparCarrinho = () => {
     setItensCarrinho([]);
     setObservacoes('');
   };
 
-  // Calcular total
   const totalCarrinho = itensCarrinho.reduce(
     (acc, item) => acc + (item.preco * item.quantidade), 
     0
   );
 
-  // Gerar mensagem do WhatsApp
   const gerarMensagemWhatsApp = () => {
     let mensagem = "🛵 *NOVO PEDIDO - BARRA BAMBU*\n\n";
     mensagem += "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n";
@@ -94,9 +88,8 @@ export const CarrinhoProvider = ({ children }) => {
     return encodeURIComponent(mensagem);
   };
 
-  // Enviar para WhatsApp
   const enviarWhatsApp = () => {
-    const numero = '5511936340295'; // Substitua pelo número real
+    const numero = '5511936340295'; 
     const mensagem = gerarMensagemWhatsApp();
     window.open(`https://wa.me/${numero}?text=${mensagem}`, '_blank');
     limparCarrinho();

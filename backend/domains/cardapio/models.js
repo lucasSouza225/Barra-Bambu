@@ -16,12 +16,12 @@ const cardapioSchema = new Schema({
     },
     categoria: { 
         type: String, 
-        enum: ['entradas', 'principais', 'bebidas', 'sobremesas'],
+        enum: ['entradas', 'principais', 'bebidas', 'sobremesas', 'carnes', 'peixes', 'petiscos'], 
         required: [true, "Categoria é obrigatória"]
     },
     imagem: { 
-        type: String, 
-        default: 'https://via.placeholder.com/300x200/38241B/FFD301?text=Prato' 
+        type: String,
+        default: '' 
     },
     disponivel: { 
         type: Boolean, 

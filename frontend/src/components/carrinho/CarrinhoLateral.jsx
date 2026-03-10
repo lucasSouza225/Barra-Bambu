@@ -1,10 +1,9 @@
-// components/CarrinhoLateral.jsx
 import { useState } from 'react';
 import { useCarrinho } from '../../contexts/carrinho/CarrinhoContext';
 import { FiShoppingCart } from 'react-icons/fi';
-import { IoRestaurant, IoClose } from 'react-icons/io5'; // Importações que faltavam
+import { IoRestaurant, IoClose } from 'react-icons/io5';
 import { FaWhatsapp } from 'react-icons/fa';
-import { MdDelete } from 'react-icons/md'; // Ícone de lixeira
+import { MdDelete } from 'react-icons/md';
 
 const CarrinhoLateral = () => {
   const [aberto, setAberto] = useState(false);
