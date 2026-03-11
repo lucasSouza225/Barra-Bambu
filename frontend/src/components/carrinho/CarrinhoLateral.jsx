@@ -4,9 +4,11 @@ import { FiShoppingCart } from 'react-icons/fi';
 import { IoRestaurant, IoClose } from 'react-icons/io5';
 import { FaWhatsapp } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
+import FormularioEntregaSimples from './FormularioEntrega';
 
 const CarrinhoLateral = () => {
   const [aberto, setAberto] = useState(false);
+  const [mostrarFormEntrega, setMostrarFormEntrega] = useState(false);
   const {
     itensCarrinho,
     observacoes,
@@ -14,6 +16,7 @@ const CarrinhoLateral = () => {
     removerItem,
     atualizarQuantidade,
     totalCarrinho,
+    limparCarrinho, // ← IMPORTANTE: importar a função
     enviarWhatsApp
   } = useCarrinho();
 
@@ -24,6 +27,44 @@ const CarrinhoLateral = () => {
       style: 'currency',
       currency: 'BRL'
     });
+  };
+
+  const handleFinalizarPedido = (dadosEntrega) => {
+    let message = "Olá! Gostaria de fazer um pedido para entrega:\n\n";
+    message += "--- Detalhes do Pedido ---\n";
+    
+    itensCarrinho.forEach(item => {
+      const itemTotal = item.preco * item.quantidade;
+      message += `${item.quantidade}x - ${item.nome} (R$ ${itemTotal.toFixed(2).replace('.', ',')})\n`;
+    });
+    
+    message += `\nTotal do Pedido: R$ ${totalCarrinho.toFixed(2).replace('.', ',')}`;
+    
+    if (observacoes) {
+      message += `\n\nObs: ${observacoes}`;
+    }
+    
+    message += "\n\n--- Dados para Entrega ---\n";
+    message += `Rua: ${dadosEntrega.rua}, Nº: ${dadosEntrega.numero}\n`;
+    message += `Bairro: ${dadosEntrega.bairro}\n`;
+    if (dadosEntrega.complemento) {
+      message += `Complemento: ${dadosEntrega.complemento}\n`;
+    }
+    message += `Telefone: ${dadosEntrega.telefone}\n`;
+    message += "\nPor favor, confirme a disponibilidade, o valor total (incluindo taxa de entrega) e o prazo.";
+    
+    // Enviar para WhatsApp
+    const numero = '551136340295';
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+    
+    limparCarrinho();
+    
+
+    setMostrarFormEntrega(false);
+    setAberto(false);
+    
+    alert('Pedido enviado com sucesso!');
   };
 
   return (
@@ -47,7 +88,6 @@ const CarrinhoLateral = () => {
       <div className={`fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
         aberto ? 'translate-x-0' : 'translate-x-full'
       }`}>
-        {/* Header */}
         <div className="bg-dark-bg text-white p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold">Seu Pedido</h2>
           <button
@@ -58,7 +98,6 @@ const CarrinhoLateral = () => {
           </button>
         </div>
 
-        {/* Lista de itens */}
         <div className="p-4 h-[calc(100vh-200px)] overflow-y-auto">
           {itensCarrinho.length === 0 ? (
             <div className="text-center py-12">
@@ -115,7 +154,6 @@ const CarrinhoLateral = () => {
           )}
         </div>
 
-        {/* Observações gerais */}
         {itensCarrinho.length > 0 && (
           <div className="p-4 border-t">
             <label className="block text-gray-700 mb-2">Observações gerais</label>
@@ -129,7 +167,6 @@ const CarrinhoLateral = () => {
           </div>
         )}
 
-        {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 bg-gray-50 p-4 border-t">
           <div className="flex justify-between items-center mb-4">
             <span className="font-bold text-lg">Total:</span>
@@ -139,10 +176,7 @@ const CarrinhoLateral = () => {
           </div>
 
           <button
-            onClick={() => {
-              enviarWhatsApp();
-              setAberto(false);
-            }}
+            onClick={() => setMostrarFormEntrega(true)}
             disabled={itensCarrinho.length === 0}
             className={`w-full bg-green-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors ${
               itensCarrinho.length === 0
@@ -151,10 +185,17 @@ const CarrinhoLateral = () => {
             }`}
           >
             <FaWhatsapp className="text-lg" />
-            Finalizar Pedido via WhatsApp
+            Finalizar Pedido
           </button>
         </div>
       </div>
+
+      {/* Modal de entrega */}
+      <FormularioEntregaSimples
+        aberto={mostrarFormEntrega}
+        onClose={() => setMostrarFormEntrega(false)}
+        onSubmit={handleFinalizarPedido}
+      />
     </>
   );
 };

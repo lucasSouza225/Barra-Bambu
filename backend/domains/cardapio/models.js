@@ -16,7 +16,7 @@ const cardapioSchema = new Schema({
     },
     categoria: { 
         type: String, 
-        enum: ['entradas', 'principais', 'bebidas', 'sobremesas', 'carnes', 'peixes', 'petiscos'], 
+        enum: ['entradas', 'principais', 'bebidas', 'sobremesas'], 
         required: [true, "Categoria é obrigatória"]
     },
     imagem: { 

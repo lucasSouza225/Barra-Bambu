@@ -27,11 +27,8 @@ const CardapioPublico = () => {
     { id: 'todos', nome: 'Todos', icon: <MdRestaurantMenu /> },
     { id: 'entradas', nome: 'Entradas', icon: <FaUtensils /> },
     { id: 'principais', nome: 'Pratos Principais', icon: <IoRestaurant /> },
-    { id: 'carnes', nome: 'Carnes', icon: <MdRestaurant /> },
-    { id: 'peixes', nome: 'Peixes', icon: <IoFish /> },
     { id: 'bebidas', nome: 'Bebidas', icon: <IoWine /> },
     { id: 'sobremesas', nome: 'Sobremesas', icon: <IoIceCream /> },
-    { id: 'petiscos', nome: 'Petiscos', icon: <MdLocalPizza /> },
   ];
 
   useEffect(() => {

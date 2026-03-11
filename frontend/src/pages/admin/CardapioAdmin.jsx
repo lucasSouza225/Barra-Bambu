@@ -361,11 +361,8 @@ const CardapioAdmin = () => {
                 >
                   <option value="entradas">Entradas</option>
                   <option value="principais">Pratos Principais</option>
-                  <option value="carnes">Carnes</option>
-                  <option value="peixes">Peixes</option>
                   <option value="bebidas">Bebidas</option>
                   <option value="sobremesas">Sobremesas</option>
-                  <option value="petiscos">Petiscos</option>
                 </select>
               </div>
             </div>
