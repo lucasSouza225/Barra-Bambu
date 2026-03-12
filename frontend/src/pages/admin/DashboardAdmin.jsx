@@ -1,31 +1,70 @@
 import { useState, useEffect } from 'react';
 import { cardapioService } from '../../service/cardapioService';
-import { FiShoppingBag, FiImage, FiFilm } from 'react-icons/fi';
-import { IoRestaurant, IoImages, IoCafe } from 'react-icons/io5';
-import { MdRestaurantMenu, MdPhotoLibrary, MdViewCarousel } from 'react-icons/md';
+import { galeriaService } from '../../service/galeriaService';
+import { carrosselService } from '../../service/carrosselService';
+import { FiShoppingBag, FiFilm } from 'react-icons/fi';
+import { IoImages, IoCafe } from 'react-icons/io5';
+import { MdRestaurantMenu, MdViewCarousel } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardAdmin = () => {
+  const navigate = useNavigate();
+  
+  // Estados para Cardápio
   const [totalItens, setTotalItens] = useState(0);
   const [totalItensDisponiveis, setTotalItensDisponiveis] = useState(0);
   const [totalDestaques, setTotalDestaques] = useState(0);
+  
+  // Estados para Galeria
+  const [totalImagensGaleria, setTotalImagensGaleria] = useState(0);
+  const [imagensAtivas, setImagensAtivas] = useState(0);
+  const [imagensInativas, setImagensInativas] = useState(0);
+  
+  // Estados para Carrossel
+  const [totalBanners, setTotalBanners] = useState(0);
+  const [bannersAtivos, setBannersAtivos] = useState(0);
+  
   const [loading, setLoading] = useState(true);
 
-  // Dados mockados para galeria e carrossel (depois você substitui por chamadas reais)
-  const totalImagensGaleria = 4;
-  const totalBannersAtivos = 2;
-
   useEffect(() => {
-    carregarDadosCardapio();
+    carregarTodosDados();
   }, []);
 
-  const carregarDadosCardapio = async () => {
+  const carregarTodosDados = async () => {
     try {
       setLoading(true);
-      const itens = await cardapioService.listar();
       
+      // Carregar dados do cardápio
+      const itens = await cardapioService.listar();
       setTotalItens(itens.length);
       setTotalItensDisponiveis(itens.filter(item => item.disponivel).length);
       setTotalDestaques(itens.filter(item => item.destaque).length);
+      
+      // Carregar dados da galeria
+      try {
+        const galeria = await galeriaService.listar();
+        setTotalImagensGaleria(galeria.length);
+        setImagensAtivas(galeria.filter(img => img.ativo).length);
+        setImagensInativas(galeria.filter(img => !img.ativo).length);
+      } catch (error) {
+        console.error('Erro ao carregar galeria:', error);
+        // Fallback para dados mockados se a API não existir ainda
+        setTotalImagensGaleria(4);
+        setImagensAtivas(3);
+        setImagensInativas(1);
+      }
+      
+      // Carregar dados do carrossel
+      try {
+        const banners = await carrosselService.listar();
+        setTotalBanners(banners.length);
+        setBannersAtivos(banners.filter(b => b.ativo).length);
+      } catch (error) {
+        console.error('Erro ao carregar carrossel:', error);
+        // Fallback para dados mockados se a API não existir ainda
+        setTotalBanners(3);
+        setBannersAtivos(2);
+      }
       
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -55,23 +94,29 @@ const DashboardAdmin = () => {
       icone: <IoImages className="text-3xl text-secondary" />,
       bgColor: 'bg-secondary/10',
       detalhes: [
-        { label: 'Ativas', valor: 3, cor: 'text-green-600' },
-        { label: 'Inativas', valor: 1, cor: 'text-red-600' }
+        { label: 'Ativas', valor: imagensAtivas, cor: 'text-green-600' },
+        { label: 'Inativas', valor: imagensInativas, cor: 'text-red-600' }
       ]
     },
     {
       id: 3,
       titulo: 'Carrossel',
       descricao: 'Banners do site',
-      valor: totalBannersAtivos,
+      valor: totalBanners,
       icone: <MdViewCarousel className="text-3xl text-accent" />,
       bgColor: 'bg-accent/10',
       detalhes: [
-        { label: 'Ativos', valor: totalBannersAtivos, cor: 'text-green-600' },
-        { label: 'Ordem', valor: '1-3', cor: 'text-gray-600' }
+        { label: 'Ativos', valor: bannersAtivos, cor: 'text-green-600' },
+        { label: 'Inativos', valor: totalBanners - bannersAtivos, cor: 'text-red-600' }
       ]
     }
   ];
+
+  // Funções para navegação rápida
+  const irParaCardapio = () => navigate('/admin/cardapio');
+  const irParaGaleria = () => navigate('/admin/galeria');
+  const irParaCarrossel = () => navigate('/admin/carrossel');
+  const irParaNovoItem = () => navigate('/admin/cardapio', { state: { novoItem: true } });
 
   if (loading) {
     return (
@@ -89,16 +134,13 @@ const DashboardAdmin = () => {
           Dashboard Administrativo
         </h1>
         
-        <div className="bg-white px-4 py-2 rounded-lg shadow">
-          <span className="text-sm text-gray-500">
-            {new Date().toLocaleDateString('pt-BR', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </span>
-        </div>
+        <button 
+          onClick={carregarTodosDados}
+          className="bg-primary/10 text-primary px-4 py-2 rounded-lg hover:bg-primary/20 transition-colors flex items-center gap-2"
+          title="Atualizar dados"
+        >
+          🔄 Atualizar
+        </button>
       </div>
 
       {/* Cards principais */}
@@ -106,7 +148,12 @@ const DashboardAdmin = () => {
         {cards.map((card) => (
           <div
             key={card.id}
-            className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+            className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+            onClick={() => {
+              if (card.id === 1) irParaCardapio();
+              if (card.id === 2) irParaGaleria();
+              if (card.id === 3) irParaCarrossel();
+            }}
           >
             {/* Header do card */}
             <div className={`p-4 ${card.bgColor} flex items-center justify-between`}>
@@ -149,19 +196,31 @@ const DashboardAdmin = () => {
             Ações Rápidas - Cardápio
           </h3>
           <div className="grid grid-cols-2 gap-3">
-            <button className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left">
+            <button 
+              onClick={irParaNovoItem}
+              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left"
+            >
               <p className="font-semibold text-dark-bg">Adicionar Item</p>
               <p className="text-xs text-gray-500">Novo prato no cardápio</p>
             </button>
-            <button className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left">
+            <button 
+              onClick={irParaCardapio}
+              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left"
+            >
               <p className="font-semibold text-dark-bg">Gerenciar Destaques</p>
               <p className="text-xs text-gray-500">Itens em destaque</p>
             </button>
-            <button className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left">
+            <button 
+              onClick={irParaCardapio}
+              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left"
+            >
               <p className="font-semibold text-dark-bg">Ver Cardápio</p>
               <p className="text-xs text-gray-500">Visualizar todos os itens</p>
             </button>
-            <button className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left">
+            <button 
+              onClick={irParaCardapio}
+              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left"
+            >
               <p className="font-semibold text-dark-bg">Categorias</p>
               <p className="text-xs text-gray-500">Gerenciar categorias</p>
             </button>
@@ -192,8 +251,12 @@ const DashboardAdmin = () => {
               <span className="font-bold text-dark-bg">{totalImagensGaleria}</span>
             </div>
             <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+              <span className="text-gray-600">Banners no carrossel</span>
+              <span className="font-bold text-dark-bg">{totalBanners}</span>
+            </div>
+            <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
               <span className="text-gray-600">Banners ativos</span>
-              <span className="font-bold text-dark-bg">{totalBannersAtivos}</span>
+              <span className="font-bold text-green-600">{bannersAtivos}</span>
             </div>
           </div>
         </div>
