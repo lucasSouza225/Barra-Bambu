@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import UserRouter from "./domains/user/routes.js"
 import CardapioRouter from "./domains/cardapio/routes.js"
+import GaleriaRouter from "./domains/galeria/routes.js"
 import CarrosselRouter from "./domains/carrossel/routes.js"
 import cors from 'cors'
 import cookieParser from "cookie-parser";
@@ -26,6 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/users", UserRouter)
 app.use("/cardapio", CardapioRouter)
 app.use("/upload", UploadRouter)
+app.use("/galeria", GaleriaRouter)
 app.use("/carrossel", CarrosselRouter)
 
 app.listen(PORT, () => {

@@ -1,130 +1,303 @@
-import React, { useState } from 'react';
-
-// Importe suas imagens
-import gallery1 from '../../assets/gallery-1.jpg';
-import gallery2 from '../../assets/gallery-2.jpg';
-import gallery3 from '../../assets/gallery-3.jpg';
-import gallery4 from '../../assets/gallery-4.jpg';
-import gallery5 from '../../assets/gallery-5.jpg';
-import gallery6 from '../../assets/gallery-6.jpg';
-// Adicione mais imagens conforme necessário
+import { useState, useEffect } from 'react';
+import { galeriaService } from '../../service/galeriaService';
+import { FiImage, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { IoImages } from 'react-icons/io5';
 
 const Galeria = () => {
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [currentImage, setCurrentImage] = useState('');
+  const [imagens, setImagens] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [categoriaAtiva, setCategoriaAtiva] = useState('todas');
+  const [modalAberto, setModalAberto] = useState(false);
+  const [imagemSelecionada, setImagemSelecionada] = useState(null);
+  const [indiceAtual, setIndiceAtual] = useState(0);
+  
+  // NOVOS ESTADOS PARA PAGINAÇÃO
+  const [limite, setLimite] = useState(8); // Mostra 8 imagens inicialmente
+  const [carregandoMais, setCarregandoMais] = useState(false);
 
-  // Dados da galeria (pode vir de um arquivo separado ou API)
-  const galleryImages = [
-    { id: 1, path: gallery1, alt: 'Ambiente aconchegante do restaurante' },
-    { id: 2, path: gallery2, alt: 'Área externa com mesas' },
-    { id: 3, path: gallery3, alt: 'Bar com drinks especiais' },
-    { id: 4, path: gallery4, alt: 'Espaço para eventos' },
-    { id: 5, path: gallery5, alt: 'Prato especial da casa' },
-    { id: 6, path: gallery6, alt: 'Happy hour com amigos' },
-    // Adicione mais imagens conforme necessário
+  const categorias = [
+    { id: 'todas', nome: 'Todas', icon: '🖼️' },
+    { id: 'ambiente', nome: 'Ambiente', icon: '🏠' },
+    { id: 'eventos', nome: 'Eventos', icon: '🎉' },
+    { id: 'pratos', nome: 'Pratos', icon: '🍽️' },
+    { id: 'outros', nome: 'Outros', icon: '📸' }
   ];
 
-  // Abrir lightbox
-  const openLightbox = (imagePath) => {
-    setCurrentImage(imagePath);
-    setLightboxOpen(true);
-    // Prevenir scroll do body quando lightbox está aberto
+  useEffect(() => {
+    carregarImagens();
+  }, []);
+
+  // Resetar limite quando mudar de categoria
+  useEffect(() => {
+    setLimite(8);
+  }, [categoriaAtiva]);
+
+  const carregarImagens = async () => {
+    try {
+      setLoading(true);
+      const data = await galeriaService.listarAtivas();
+      setImagens(data);
+    } catch (error) {
+      console.error('Erro ao carregar galeria:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const imagensFiltradas = categoriaAtiva === 'todas'
+    ? imagens
+    : imagens.filter(img => img.categoria === categoriaAtiva);
+
+  // Aplicar limite apenas na categoria "Todas"
+  const imagensParaMostrar = categoriaAtiva === 'todas'
+    ? imagensFiltradas.slice(0, limite)
+    : imagensFiltradas;
+
+  const temMaisImagens = categoriaAtiva === 'todas' && limite < imagensFiltradas.length;
+
+  const carregarMais = () => {
+    setCarregandoMais(true);
+    // Simular um pequeno delay para feedback visual
+    setTimeout(() => {
+      setLimite(prev => prev + 8); // Carrega mais 8 imagens
+      setCarregandoMais(false);
+    }, 500);
+  };
+
+  const abrirModal = (imagem, index) => {
+    // Para o modal, precisamos do índice real no array filtrado (sem limite)
+    const indexReal = imagensFiltradas.findIndex(img => img._id === imagem._id);
+    setImagemSelecionada(imagem);
+    setIndiceAtual(indexReal);
+    setModalAberto(true);
     document.body.style.overflow = 'hidden';
   };
 
-  // Fechar lightbox
-  const closeLightbox = () => {
-    setLightboxOpen(false);
-    setCurrentImage('');
+  const fecharModal = () => {
+    setModalAberto(false);
+    setImagemSelecionada(null);
     document.body.style.overflow = 'unset';
   };
 
+  const proximaImagem = () => {
+    const novoIndice = (indiceAtual + 1) % imagensFiltradas.length;
+    setIndiceAtual(novoIndice);
+    setImagemSelecionada(imagensFiltradas[novoIndice]);
+  };
+
+  const imagemAnterior = () => {
+    const novoIndice = (indiceAtual - 1 + imagensFiltradas.length) % imagensFiltradas.length;
+    setIndiceAtual(novoIndice);
+    setImagemSelecionada(imagensFiltradas[novoIndice]);
+  };
+
   // Fechar com tecla ESC
-  React.useEffect(() => {
+  useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === 'Escape') {
-        closeLightbox();
-      }
+      if (e.key === 'Escape') fecharModal();
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
-  return (
-    <>
-      <section id="galeria" className="p-20 bg-light-bg">
+  if (loading) {
+    return (
+      <section className="py-16 bg-light-bg">
         <div className="container mx-auto px-4">
-          
-          {/* Título da seção */}
-          <div className="text-center mb-12">
-            <h2 className="font-['Georgia',serif] text-3xl md:text-4xl text-dark-bg inline-block pb-3 px-6 border-b-2 border-primary">
-              Galeria de fotos
-            </h2>
-          </div>
-
-          {/* Grid da galeria */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
-            {galleryImages.map((image) => (
-              <div 
-                key={image.id}
-                onClick={() => openLightbox(image.path)}
-                className="group relative overflow-hidden rounded-lg h-62.5 cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <img 
-                  src={image.path} 
-                  alt={image.alt}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:rotate-1"
-                />
-                
-                {/* Overlay opcional no hover */}
-                <div className="absolute inset-0 bg-linear-to-t from-dark-bg/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                  <p className="text-white text-sm p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    Clique para ampliar
-                  </p>
-                </div>
-
-                {/* Ícone de lupa */}
-                <div className="absolute top-4 right-4 bg-primary/90 text-dark-bg rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Botão Mais fotos */}
-          <div className="text-center">
-            <button 
-              className="bg-primary text-dark-bg font-bold px-10 py-4 rounded-md cursor-pointer transition-all duration-300 shadow-md hover:bg-secondary hover:text-white hover:-translate-y-1 hover:shadow-xl"
-              onClick={() => window.location.href = '/galeria-completa'}
-            >
-              Mais fotos
-            </button>
+          <h2 className="text-4xl font-bold text-center text-dark-bg mb-12">
+            Nossa Galeria
+          </h2>
+          <div className="flex justify-center items-center h-64">
+            <IoImages className="text-4xl text-primary animate-pulse mr-2" />
+            <div className="text-xl">Carregando galeria...</div>
           </div>
         </div>
       </section>
+    );
+  }
 
-      {/* Lightbox/Modal */}
-      {lightboxOpen && (
-        <div 
-          className="fixed inset-0 z-200 bg-black/90 pt-25 overflow-auto animate-[zoom_0.6s_ease]"
-          onClick={closeLightbox}
-        >
+  if (imagens.length === 0) {
+    return (
+      <section className="py-16 bg-light-bg">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center text-dark-bg mb-12">
+            Nossa Galeria
+          </h2>
+          <div className="text-center py-12">
+            <FiImage className="text-6xl text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-xl">Em breve novas fotos!</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <>
+      <section className="py-16 bg-light-bg">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center text-dark-bg mb-4">
+            Nossa Galeria
+          </h2>
+          <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+            Conheça um pouco mais do nosso espaço, pratos e momentos especiais
+          </p>
+
+          {/* Filtros por categoria */}
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
+            {categorias.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setCategoriaAtiva(cat.id)}
+                className={`px-6 py-2 rounded-full transition-all duration-300 flex items-center gap-2 ${
+                  categoriaAtiva === cat.id
+                    ? 'bg-primary text-dark-bg font-bold shadow-lg scale-105'
+                    : 'bg-white text-gray-600 hover:bg-primary/20'
+                }`}
+              >
+                <span>{cat.icon}</span>
+                {cat.nome}
+              </button>
+            ))}
+          </div>
+          {/* Grid de imagens */}
+          {imagensFiltradas.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-xl">
+                Nenhuma imagem encontrada nesta categoria
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {imagensParaMostrar.map((imagem) => (
+                  <div
+                    key={imagem._id}
+                    onClick={() => abrirModal(imagem)}
+                    className="group relative overflow-hidden rounded-lg shadow-lg cursor-pointer transform transition-all duration-500 hover:scale-105 hover:shadow-2xl"
+                  >
+                    <div className="aspect-square overflow-hidden">
+                      {imagem.imagem ? (
+                        <img
+                          src={imagem.imagem}
+                          alt={imagem.titulo}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://via.placeholder.com/400x400/38241B/FFD301?text=Erro';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <FiImage className="text-4xl text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Overlay no hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                      <div className="text-white">
+                        <h3 className="font-bold text-lg">{imagem.titulo}</h3>
+                        {imagem.descricao && (
+                          <p className="text-sm opacity-90">{imagem.descricao}</p>
+                        )}
+                        {imagem.destaque && (
+                          <span className="inline-block mt-2 text-xs bg-primary text-dark-bg px-2 py-1 rounded-full">
+                            ⭐ Destaque
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Badge de categoria */}
+                    <div className="absolute top-2 left-2">
+                      <span className="bg-dark-bg/80 text-white text-xs px-2 py-1 rounded-full">
+                        {categorias.find(c => c.id === imagem.categoria)?.icon} {imagem.categoria}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Botão Ver Mais */}
+              {temMaisImagens && (
+                <div className="text-center mt-10">
+                  <button
+                    onClick={carregarMais}
+                    disabled={carregandoMais}
+                    className="bg-primary text-dark-bg px-8 py-3 rounded-lg font-bold hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
+                  >
+                    {carregandoMais ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-dark-bg"></div>
+                        Carregando...
+                      </>
+                    ) : (
+                      <>
+                        <span>📸</span>
+                        Ver Mais Fotos ({imagensFiltradas.length - limite} restantes)
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Modal de visualização */}
+      {modalAberto && imagemSelecionada && (
+        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
           {/* Botão fechar */}
-          <span 
-            className="absolute top-3.75 right-8.75 text-gray-100 text-4xl font-bold transition-colors duration-300 cursor-pointer hover:text-gray-400"
-            onClick={closeLightbox}
+          <button
+            onClick={fecharModal}
+            className="absolute top-4 right-4 text-white hover:text-primary transition-colors z-10"
           >
-            &times;
-          </span>
+            <FiX size={32} />
+          </button>
 
-          {/* Imagem do lightbox */}
-          <img 
-            src={currentImage} 
-            alt="Imagem ampliada"
-            className="block mx-auto w-4/5 max-w-150 animate-[zoom_0.6s_ease]"
-          />
+          {/* Navegação */}
+          {imagensFiltradas.length > 1 && (
+            <>
+              <button
+                onClick={imagemAnterior}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-colors bg-black/50 p-3 rounded-full"
+              >
+                <FiChevronLeft size={24} />
+              </button>
+              <button
+                onClick={proximaImagem}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-primary transition-colors bg-black/50 p-3 rounded-full"
+              >
+                <FiChevronRight size={24} />
+              </button>
+            </>
+          )}
+
+          {/* Imagem */}
+          <div className="max-w-6xl w-full max-h-[90vh] flex flex-col items-center">
+            <img
+              src={imagemSelecionada.imagem}
+              alt={imagemSelecionada.titulo}
+              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://via.placeholder.com/800x600/38241B/FFD301?text=Erro+ao+carregar';
+              }}
+            />
+
+            {/* Informações da imagem */}
+            <div className="mt-4 text-white text-center">
+              <h3 className="text-2xl font-bold">{imagemSelecionada.titulo}</h3>
+              {imagemSelecionada.descricao && (
+                <p className="text-gray-300 mt-2">{imagemSelecionada.descricao}</p>
+              )}
+              <p className="text-sm text-gray-400 mt-2">
+                {indiceAtual + 1} / {imagensFiltradas.length}
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </>
