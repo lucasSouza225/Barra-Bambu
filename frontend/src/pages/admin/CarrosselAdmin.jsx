@@ -1,137 +1,280 @@
-import { useState } from 'react';
-import { IoImageOutline } from 'react-icons/io5';
-import { MdDelete, MdVisibility, MdVisibilityOff, MdArrowUpward, MdArrowDownward } from 'react-icons/md';
-import { FiPlus } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { carrosselService } from '../../service/carrosselService';
+import { 
+  FiPlus, 
+  FiEdit, 
+  FiTrash2,
+  FiArrowUp,
+  FiArrowDown,
+  FiImage
+} from 'react-icons/fi';
+import { 
+  IoClose,
+  IoSave,
+  IoRestaurant
+} from 'react-icons/io5';
+import { 
+  MdVisibility, 
+  MdVisibilityOff 
+} from 'react-icons/md';
 
 const CarrosselAdmin = () => {
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [mostrarForm, setMostrarForm] = useState(false);
-  const [banners, setBanners] = useState([
-    {
-      id: 1,
-      titulo: 'Ambiente Aconchegante',
-      descricao: 'Espaço perfeito para momentos especiais',
-      imagem: 'https://images.pexels.com/photos/260922/pexels-photo-260922.jpeg',
-      ordem: 1,
-      ativo: true
-    },
-    {
-      id: 2,
-      titulo: 'Gastronomia Premium',
-      descricao: 'Sabores únicos e ingredientes selecionados',
-      imagem: '',
-      ordem: 2,
-      ativo: true
-    },
-    {
-      id: 3,
-      titulo: 'Eventos Especiais',
-      descricao: 'Celebre conosco suas ocasiões',
-      imagem: '',
-      ordem: 3,
-      ativo: false
-    }
-  ]);
+  const [editandoId, setEditandoId] = useState(null);
+  
+  // NOVOS STATES PARA UPLOAD
+  const [imagemFile, setImagemFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
 
-  const [novoBanner, setNovoBanner] = useState({
+  const [formData, setFormData] = useState({
     titulo: '',
     descricao: '',
     imagem: '',
-    ordem: banners.length + 1,
+    link: '',
+    ordem: 0,
     ativo: true
   });
 
+  useEffect(() => {
+    carregarBanners();
+  }, []);
+
+  const carregarBanners = async () => {
+    try {
+      setLoading(true);
+      const data = await carrosselService.listar();
+      const ordenados = data.sort((a, b) => a.ordem - b.ordem);
+      setBanners(ordenados);
+    } catch (error) {
+      setError('Erro ao carregar banners');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setNovoBanner(prev => ({
+    setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    const novo = {
-      ...novoBanner,
-      id: Date.now(),
-      imagem: novoBanner.imagem // Agora pode ser vazio
-    };
-    
-    setBanners([...banners, novo]);
-    setNovoBanner({
-      titulo: '',
-      descricao: '',
-      imagem: '',
-      ordem: banners.length + 2,
-      ativo: true
-    });
-    setMostrarForm(false);
-  };
-
-  const toggleAtivo = (id) => {
-    setBanners(banners.map(banner => 
-      banner.id === id ? { ...banner, ativo: !banner.ativo } : banner
-    ));
-  };
-
-  const deletarBanner = (id) => {
-    if (window.confirm('Tem certeza que deseja remover este banner?')) {
-      setBanners(banners.filter(banner => banner.id !== id));
+  // NOVA FUNÇÃO PARA UPLOAD
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagemFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const moverOrdem = (id, direcao) => {
-    const bannerIndex = banners.findIndex(b => b.id === id);
+  // MODIFICAR handleSubmit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setUploading(true);
+    
+    try {
+      let imagemUrl = formData.imagem || '';
+      
+      if (imagemFile) {
+        const uploadResult = await carrosselService.uploadImagem(imagemFile);
+        imagemUrl = uploadResult.url;
+      }
+      
+      const bannerData = {
+        ...formData,
+        imagem: imagemUrl
+      };
+      
+      if (editandoId) {
+        await carrosselService.atualizar(editandoId, bannerData);
+      } else {
+        await carrosselService.criar(bannerData);
+      }
+      
+      await carregarBanners();
+      setFormData({
+        titulo: '',
+        descricao: '',
+        imagem: '',
+        link: '',
+        ordem: 0,
+        ativo: true
+      });
+      setImagemFile(null);
+      setPreviewUrl('');
+      setEditandoId(null);
+      setMostrarForm(false);
+      
+    } catch (error) {
+      setError('Erro ao salvar banner');
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleEdit = (banner) => {
+    setFormData({
+      titulo: banner.titulo,
+      descricao: banner.descricao || '',
+      imagem: banner.imagem,
+      link: banner.link || '',
+      ordem: banner.ordem,
+      ativo: banner.ativo
+    });
+    setEditandoId(banner._id);
+    setMostrarForm(true);
+    setPreviewUrl('');
+    setImagemFile(null);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza que deseja remover este banner?')) {
+      try {
+        await carrosselService.deletar(id);
+        await carregarBanners();
+      } catch (error) {
+        setError('Erro ao deletar banner');
+        console.error(error);
+      }
+    }
+  };
+
+  const handleToggleAtivo = async (id) => {
+    try {
+      await carrosselService.toggleAtivo(id);
+      await carregarBanners();
+    } catch (error) {
+      setError('Erro ao alterar status');
+      console.error(error);
+    }
+  };
+
+  const handleMoverOrdem = async (id, direcao) => {
+    const index = banners.findIndex(b => b._id === id);
     if (
-      (direcao === 'up' && bannerIndex === 0) || 
-      (direcao === 'down' && bannerIndex === banners.length - 1)
+      (direcao === 'up' && index === 0) || 
+      (direcao === 'down' && index === banners.length - 1)
     ) {
       return;
     }
 
     const newBanners = [...banners];
-    const targetIndex = direcao === 'up' ? bannerIndex - 1 : bannerIndex + 1;
+    const targetIndex = direcao === 'up' ? index - 1 : index + 1;
     
-    // Troca as ordens
-    const tempOrdem = newBanners[bannerIndex].ordem;
-    newBanners[bannerIndex].ordem = newBanners[targetIndex].ordem;
+    const tempOrdem = newBanners[index].ordem;
+    newBanners[index].ordem = newBanners[targetIndex].ordem;
     newBanners[targetIndex].ordem = tempOrdem;
     
-    // Troca as posições
-    [newBanners[bannerIndex], newBanners[targetIndex]] = [newBanners[targetIndex], newBanners[bannerIndex]];
+    [newBanners[index], newBanners[targetIndex]] = [newBanners[targetIndex], newBanners[index]];
     
-    setBanners(newBanners);
+    try {
+      await carrosselService.reordenar(
+        newBanners.map((b, i) => ({ id: b._id, ordem: i }))
+      );
+      setBanners(newBanners);
+    } catch (error) {
+      setError('Erro ao reordenar');
+      console.error(error);
+    }
   };
+
+  const fecharForm = () => {
+    setMostrarForm(false);
+    setEditandoId(null);
+    setFormData({
+      titulo: '',
+      descricao: '',
+      imagem: '',
+      link: '',
+      ordem: 0,
+      ativo: true
+    });
+    setImagemFile(null);
+    setPreviewUrl('');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <IoRestaurant className="text-4xl text-primary animate-pulse mr-2" />
+        <div className="text-xl">Carregando banners...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-dark-bg">Gerenciar Carrossel</h1>
+        <h1 className="text-3xl font-bold text-dark-bg flex items-center gap-2">
+          <FiImage className="text-primary" />
+          Gerenciar Carrossel
+        </h1>
         <button
-          onClick={() => setMostrarForm(!mostrarForm)}
+          onClick={() => {
+            if (mostrarForm) {
+              fecharForm();
+            } else {
+              setMostrarForm(true);
+              setEditandoId(null);
+              setFormData({
+                titulo: '',
+                descricao: '',
+                imagem: '',
+                link: '',
+                ordem: banners.length,
+                ativo: true
+              });
+              setImagemFile(null);
+              setPreviewUrl('');
+            }
+          }}
           className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors flex items-center gap-2"
         >
-          {mostrarForm ? 'Cancelar' : <><FiPlus /> Novo Banner</>}
+          {mostrarForm ? <IoClose /> : <FiPlus />}
+          {mostrarForm ? 'Cancelar' : 'Novo Banner'}
         </button>
       </div>
 
-      {/* Formulário para novo banner */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center gap-2">
+          <IoClose />
+          {error}
+        </div>
+      )}
+
+      {/* Formulário */}
       {mostrarForm && (
         <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-          <h2 className="text-xl font-bold mb-4 text-dark-bg">Adicionar Novo Banner</h2>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            {editandoId ? <FiEdit /> : <FiPlus />}
+            {editandoId ? 'Editar Banner' : 'Novo Banner'}
+          </h2>
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Título do banner
+                Título do Banner *
               </label>
               <input
                 type="text"
                 name="titulo"
-                value={novoBanner.titulo}
+                value={formData.titulo}
                 onChange={handleChange}
-                placeholder="Ex: Promoção de fim de semana"
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
                 required
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                placeholder="Ex: Promoção Especial"
               />
             </div>
 
@@ -141,71 +284,114 @@ const CarrosselAdmin = () => {
               </label>
               <textarea
                 name="descricao"
-                value={novoBanner.descricao}
+                value={formData.descricao}
                 onChange={handleChange}
-                placeholder="Breve descrição do banner"
                 rows="3"
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                placeholder="Breve descrição do banner"
               />
+            </div>
+
+            {/* CAMPO DE UPLOAD DE IMAGEM */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Imagem do Banner *
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
+              />
+              {previewUrl && (
+                <div className="mt-2">
+                  <img 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    className="w-32 h-32 object-cover rounded-lg border"
+                  />
+                </div>
+              )}
+              {formData.imagem && !previewUrl && (
+                <div className="mt-2">
+                  <img 
+                    src={formData.imagem} 
+                    alt="Atual" 
+                    className="w-32 h-32 object-cover rounded-lg border"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<div class="w-32 h-32 bg-gray-200 rounded flex items-center justify-center"><FiImage class="text-gray-400 text-2xl" /></div>';
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Imagem atual</p>
+                </div>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL da imagem
+                Link (opcional)
               </label>
               <input
                 type="text"
-                name="imagem"
-                value={novoBanner.imagem}
+                name="link"
+                value={formData.link}
                 onChange={handleChange}
-                placeholder="https://exemplo.com/banner.jpg"
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Deixe em branco para usar ícone padrão
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ordem de exibição
-              </label>
-              <input
-                type="number"
-                name="ordem"
-                value={novoBanner.ordem}
-                onChange={handleChange}
-                min="1"
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                placeholder="https://exemplo.com/pagina"
               />
             </div>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="ativo"
-                id="ativo"
-                checked={novoBanner.ativo}
-                onChange={handleChange}
-                className="h-4 w-4 text-primary rounded focus:ring-primary"
-              />
-              <label htmlFor="ativo" className="ml-2 text-sm text-gray-700">
-                Banner ativo
-              </label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ordem
+                </label>
+                <input
+                  type="number"
+                  name="ordem"
+                  value={formData.ordem}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="ativo"
+                    checked={formData.ativo}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-primary rounded"
+                  />
+                  {formData.ativo ? (
+                    <MdVisibility className="text-green-500" />
+                  ) : (
+                    <MdVisibilityOff className="text-red-500" />
+                  )}
+                  <span className="text-sm text-gray-700">Banner ativo</span>
+                </label>
+              </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-4">
               <button
                 type="submit"
-                className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors"
+                disabled={uploading}
+                className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                Salvar
+                {uploading ? 'Enviando...' : <IoSave />}
+                {uploading ? 'Enviando...' : (editandoId ? 'Atualizar' : 'Salvar')}
               </button>
               <button
                 type="button"
-                onClick={() => setMostrarForm(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                onClick={fecharForm}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors flex items-center gap-2"
               >
+                <IoClose />
                 Cancelar
               </button>
             </div>
@@ -221,30 +407,35 @@ const CarrosselAdmin = () => {
               <th className="p-3 text-left">Ordem</th>
               <th className="p-3 text-left">Imagem</th>
               <th className="p-3 text-left">Título</th>
+              <th className="p-3 text-left">Descrição</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {banners.sort((a, b) => a.ordem - b.ordem).map((banner) => (
-              <tr key={banner.id} className="border-t hover:bg-gray-50">
+            {banners.map((banner, index) => (
+              <tr key={banner._id} className="border-t hover:bg-gray-50">
                 <td className="p-3">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-lg w-8">{banner.ordem}</span>
+                    <span className="font-bold w-8">{banner.ordem}</span>
                     <div className="flex flex-col">
-                      <button 
-                        onClick={() => moverOrdem(banner.id, 'up')}
-                        className="text-gray-500 hover:text-primary transition-colors"
-                        disabled={banners.indexOf(banner) === 0}
+                      <button
+                        onClick={() => handleMoverOrdem(banner._id, 'up')}
+                        disabled={index === 0}
+                        className={`text-gray-500 hover:text-primary transition-colors ${
+                          index === 0 ? 'opacity-30 cursor-not-allowed' : ''
+                        }`}
                       >
-                        <MdArrowUpward className="text-lg" />
+                        <FiArrowUp />
                       </button>
-                      <button 
-                        onClick={() => moverOrdem(banner.id, 'down')}
-                        className="text-gray-500 hover:text-primary transition-colors"
-                        disabled={banners.indexOf(banner) === banners.length - 1}
+                      <button
+                        onClick={() => handleMoverOrdem(banner._id, 'down')}
+                        disabled={index === banners.length - 1}
+                        className={`text-gray-500 hover:text-primary transition-colors ${
+                          index === banners.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
+                        }`}
                       >
-                        <MdArrowDownward className="text-lg" />
+                        <FiArrowDown />
                       </button>
                     </div>
                   </div>
@@ -252,35 +443,33 @@ const CarrosselAdmin = () => {
                 <td className="p-3">
                   <div className="w-20 h-12 bg-gray-100 rounded overflow-hidden">
                     {banner.imagem ? (
-                      <img 
-                        src={banner.imagem} 
+                      <img
+                        src={banner.imagem}
                         alt={banner.titulo}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.style.display = 'none';
-                          e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center"><IoImageOutline class="text-2xl text-gray-400" /></div>';
+                          e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center"><FiImage class="text-gray-400" /></div>';
                         }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <IoImageOutline className="text-2xl text-gray-400" />
+                        <FiImage className="text-gray-400" />
                       </div>
                     )}
                   </div>
                 </td>
-                <td className="p-3 font-medium">
-                  <div>{banner.titulo}</div>
-                  {banner.descricao && (
-                    <div className="text-xs text-gray-500">{banner.descricao}</div>
-                  )}
+                <td className="p-3 font-medium">{banner.titulo}</td>
+                <td className="p-3 text-sm text-gray-600 max-w-xs truncate">
+                  {banner.descricao || '-'}
                 </td>
                 <td className="p-3">
                   <button
-                    onClick={() => toggleAtivo(banner.id)}
-                    className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition-colors ${
-                      banner.ativo 
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                    onClick={() => handleToggleAtivo(banner._id)}
+                    className={`px-3 py-1 rounded-lg text-sm flex items-center gap-1 ${
+                      banner.ativo
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -289,13 +478,22 @@ const CarrosselAdmin = () => {
                   </button>
                 </td>
                 <td className="p-3">
-                  <button
-                    onClick={() => deletarBanner(banner.id)}
-                    className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                    title="Remover"
-                  >
-                    <MdDelete className="text-xl" />
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(banner)}
+                      className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                      title="Editar"
+                    >
+                      <FiEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(banner._id)}
+                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                      title="Excluir"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -304,7 +502,7 @@ const CarrosselAdmin = () => {
 
         {banners.length === 0 && (
           <div className="text-center py-12">
-            <IoImageOutline className="text-6xl text-gray-300 mx-auto mb-4" />
+            <FiImage className="text-5xl text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500">Nenhum banner cadastrado</p>
           </div>
         )}

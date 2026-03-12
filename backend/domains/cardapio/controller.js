@@ -1,4 +1,33 @@
 import Cardapio from "./models.js";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Função para extrair nome do arquivo da URL
+const getFilenameFromUrl = (url) => {
+    if (!url) return null;
+    // Ex: http://localhost:3000/uploads/imagem-1234567890.jpg
+    const parts = url.split('/uploads/');
+    return parts[1] || null;
+};
+
+// Função para deletar arquivo físico
+const deletarArquivo = (filename) => {
+    if (!filename) return false;
+    
+    const filePath = path.join(__dirname, '../../uploads', filename);
+    
+    if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log(`✅ Arquivo deletado: ${filename}`);
+        return true;
+    }
+    console.log(`❌ Arquivo não encontrado: ${filename}`);
+    return false;
+};
 
 // GET - Listar todos os itens (público)
 export const getItens = async (req, res) => {
@@ -59,8 +88,9 @@ export const createItem = async (req, res) => {
             descricao,
             preco,
             categoria,
-            imagem: imagem || undefined,
-            destaque: destaque || false
+            imagem: imagem || '',
+            destaque: destaque || false,
+            disponivel: true
         });
 
         res.status(201).json(novoItem);
@@ -74,10 +104,26 @@ export const createItem = async (req, res) => {
     }
 };
 
-// PUT - Atualizar item (admin)
+// PUT - Atualizar item (admin) - COM DELETE DE IMAGEM ANTIGA
 export const updateItem = async (req, res) => {
     try {
         const { nome, descricao, preco, categoria, imagem, disponivel, destaque } = req.body;
+        
+        // Buscar item atual para pegar imagem antiga
+        const itemAtual = await Cardapio.findById(req.params.id);
+        
+        if (!itemAtual) {
+            return res.status(404).json({ message: "Item não encontrado" });
+        }
+
+        // Se a imagem foi alterada, deletar a imagem antiga
+        if (imagem && imagem !== itemAtual.imagem) {
+            const filename = getFilenameFromUrl(itemAtual.imagem);
+            if (filename) {
+                deletarArquivo(filename);
+                console.log('Imagem antiga deletada ao atualizar');
+            }
+        }
 
         const itemAtualizado = await Cardapio.findByIdAndUpdate(
             req.params.id,
@@ -85,13 +131,10 @@ export const updateItem = async (req, res) => {
             { new: true, runValidators: true }
         );
 
-        if (!itemAtualizado) {
-            return res.status(404).json({ message: "Item não encontrado" });
-        }
-
         res.json(itemAtualizado);
 
     } catch (error) {
+        console.error("Erro ao atualizar item:", error);
         res.status(500).json({ 
             message: "Erro ao atualizar item", 
             error: error.message 
@@ -99,18 +142,34 @@ export const updateItem = async (req, res) => {
     }
 };
 
-// DELETE - Remover item (admin)
+// DELETE - Remover item (admin) - COM DELETE DE IMAGEM
 export const deleteItem = async (req, res) => {
     try {
-        const itemRemovido = await Cardapio.findByIdAndDelete(req.params.id);
+        const itemRemovido = await Cardapio.findById(req.params.id);
         
         if (!itemRemovido) {
             return res.status(404).json({ message: "Item não encontrado" });
         }
 
-        res.json({ message: "Item removido com sucesso" });
+        // Deletar imagem física se existir
+        const filename = getFilenameFromUrl(itemRemovido.imagem);
+        let imagemDeletada = false;
+        
+        if (filename) {
+            imagemDeletada = deletarArquivo(filename);
+        }
+
+        // Deletar do banco
+        await Cardapio.findByIdAndDelete(req.params.id);
+
+        res.json({ 
+            message: "Item removido com sucesso",
+            imagemDeletada,
+            item: itemRemovido.nome
+        });
 
     } catch (error) {
+        console.error("Erro ao remover item:", error);
         res.status(500).json({ 
             message: "Erro ao remover item", 
             error: error.message 
@@ -138,4 +197,3 @@ export const toggleDisponivel = async (req, res) => {
         });
     }
 };
-

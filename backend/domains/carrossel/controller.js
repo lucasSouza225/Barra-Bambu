@@ -1,4 +1,32 @@
 import Carrossel from "./models.js";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Função para extrair nome do arquivo da URL
+const getFilenameFromUrl = (url) => {
+    if (!url) return null;
+    const parts = url.split('/uploads/');
+    return parts[1] || null;
+};
+
+// Função para deletar arquivo físico
+const deletarArquivo = (filename) => {
+    if (!filename) return false;
+    
+    const filePath = path.join(__dirname, '../../uploads', filename);
+    
+    if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log(`✅ Arquivo deletado: ${filename}`);
+        return true;
+    }
+    console.log(`❌ Arquivo não encontrado: ${filename}`);
+    return false;
+};
 
 // GET - Listar todos os banners (público)
 export const getBanners = async (req, res) => {
@@ -13,7 +41,7 @@ export const getBanners = async (req, res) => {
     }
 };
 
-// GET - Buscar banners ativos 
+// GET - Buscar banners ativos (público - para o site)
 export const getBannersAtivos = async (req, res) => {
     try {
         const banners = await Carrossel.find({ ativo: true }).sort('ordem');
@@ -73,10 +101,24 @@ export const createBanner = async (req, res) => {
     }
 };
 
-// PUT - Atualizar banner (admin)
+// PUT - Atualizar banner (admin) - COM DELETE DE IMAGEM ANTIGA
 export const updateBanner = async (req, res) => {
     try {
         const { titulo, descricao, imagem, ordem, link, ativo } = req.body;
+        
+        const bannerAtual = await Carrossel.findById(req.params.id);
+        
+        if (!bannerAtual) {
+            return res.status(404).json({ message: "Banner não encontrado" });
+        }
+
+        // Se a imagem foi alterada, deletar a imagem antiga
+        if (imagem && imagem !== bannerAtual.imagem) {
+            const filename = getFilenameFromUrl(bannerAtual.imagem);
+            if (filename) {
+                deletarArquivo(filename);
+            }
+        }
 
         const bannerAtualizado = await Carrossel.findByIdAndUpdate(
             req.params.id,
@@ -84,13 +126,10 @@ export const updateBanner = async (req, res) => {
             { new: true, runValidators: true }
         );
 
-        if (!bannerAtualizado) {
-            return res.status(404).json({ message: "Banner não encontrado" });
-        }
-
         res.json(bannerAtualizado);
 
     } catch (error) {
+        console.error("Erro ao atualizar banner:", error);
         res.status(500).json({ 
             message: "Erro ao atualizar banner", 
             error: error.message 
@@ -98,18 +137,34 @@ export const updateBanner = async (req, res) => {
     }
 };
 
-// DELETE - Remover banner (admin)
+// DELETE - Remover banner (admin) - COM DELETE DE IMAGEM
 export const deleteBanner = async (req, res) => {
     try {
-        const bannerRemovido = await Carrossel.findByIdAndDelete(req.params.id);
+        const banner = await Carrossel.findById(req.params.id);
         
-        if (!bannerRemovido) {
+        if (!banner) {
             return res.status(404).json({ message: "Banner não encontrado" });
         }
 
-        res.json({ message: "Banner removido com sucesso" });
+        // Deletar imagem física
+        const filename = getFilenameFromUrl(banner.imagem);
+        let imagemDeletada = false;
+        
+        if (filename) {
+            imagemDeletada = deletarArquivo(filename);
+        }
+
+        // Deletar do banco
+        await Carrossel.findByIdAndDelete(req.params.id);
+
+        res.json({ 
+            message: "Banner removido com sucesso",
+            imagemDeletada,
+            banner: banner.titulo
+        });
 
     } catch (error) {
+        console.error("Erro ao deletar banner:", error);
         res.status(500).json({ 
             message: "Erro ao remover banner", 
             error: error.message 
@@ -120,7 +175,7 @@ export const deleteBanner = async (req, res) => {
 // PATCH - Reordenar banners (admin)
 export const reordenarBanners = async (req, res) => {
     try {
-        const { banners } = req.body; // Array de { id, ordem }
+        const { banners } = req.body;
         
         for (const item of banners) {
             await Carrossel.findByIdAndUpdate(item.id, { ordem: item.ordem });
