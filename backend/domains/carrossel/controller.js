@@ -101,7 +101,7 @@ export const createBanner = async (req, res) => {
     }
 };
 
-// PUT - Atualizar banner (admin) - COM DELETE DE IMAGEM ANTIGA
+// PUT - Atualizar banner (admin) - CORRIGIDO
 export const updateBanner = async (req, res) => {
     try {
         const { titulo, descricao, imagem, ordem, link, ativo } = req.body;
@@ -119,11 +119,10 @@ export const updateBanner = async (req, res) => {
                 deletarArquivo(filename);
             }
         }
-
         const bannerAtualizado = await Carrossel.findByIdAndUpdate(
             req.params.id,
             { titulo, descricao, imagem, ordem, link, ativo },
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
 
         res.json(bannerAtualizado);

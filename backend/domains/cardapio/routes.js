@@ -3,6 +3,7 @@ import {
     getItens,
     getItensPorCategoria,
     getItemById,
+    getDestaques, 
     createItem,
     updateItem,
     deleteItem,
@@ -11,11 +12,13 @@ import {
 
 const router = Router();
 
-
+// Rotas públicas
 router.get("/", getItens);
+router.get("/destaques", getDestaques); 
 router.get("/categoria/:categoria", getItensPorCategoria);
 router.get("/:id", getItemById);
 
+// Rotas protegidas (precisam de autenticação)
 router.post("/", createItem);
 router.put("/:id", updateItem);
 router.delete("/:id", deleteItem);

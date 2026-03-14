@@ -102,7 +102,7 @@ export const createImagem = async (req, res) => {
     }
 };
 
-// PUT - Atualizar imagem
+// PUT - Atualizar imagem (CORRIGIDO)
 export const updateImagem = async (req, res) => {
     try {
         const { titulo, descricao, imagem, categoria, ordem, ativo, destaque } = req.body;
@@ -121,10 +121,11 @@ export const updateImagem = async (req, res) => {
             }
         }
 
+        // CORREÇÃO: { returnDocument: 'after' } em vez de { new: true }
         const imagemAtualizada = await Galeria.findByIdAndUpdate(
             req.params.id,
             { titulo, descricao, imagem, categoria, ordem, ativo, destaque },
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
 
         res.json(imagemAtualizada);

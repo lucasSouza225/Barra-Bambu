@@ -11,21 +11,17 @@ const Reserva = () => {
     contact: ''
   });
 
-  // Estado para mensagens de erro/sucesso
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Número do WhatsApp (substitua pelo número real)
   const whatsappNumber = '5511936340295'; // Exemplo: 55 (Brasil) 11 (DDD) 936340295
 
-  // Handle change dos inputs
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [id]: value
     }));
-    // Limpa o erro do campo quando o usuário começa a digitar
     if (errors[id]) {
       setErrors(prev => ({
         ...prev,
@@ -34,7 +30,6 @@ const Reserva = () => {
     }
   };
 
-  // Validação do formulário
   const validateForm = () => {
     const newErrors = {};
     
@@ -48,11 +43,9 @@ const Reserva = () => {
     return newErrors;
   };
 
-  // Handle submit do formulário
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validação
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -61,7 +54,6 @@ const Reserva = () => {
 
     setIsSubmitting(true);
 
-    // Formata a mensagem para WhatsApp
     const message = `Olá! Gostaria de fazer uma reserva:\n\n` +
                     `👤 Nome: ${formData.name}\n` +
                     `📅 Data: ${new Date(formData.date).toLocaleDateString('pt-BR')}\n` +
@@ -69,14 +61,11 @@ const Reserva = () => {
                     `👥 Número de pessoas: ${formData.people}\n` +
                     `📱 Contato: ${formData.contact}`;
 
-    // Codifica a mensagem para URL
     const encodedMessage = encodeURIComponent(message);
     
-    // Abre o WhatsApp
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
     
-    // Limpa o formulário
     setFormData({
       name: '',
       date: '',
@@ -91,7 +80,6 @@ const Reserva = () => {
     alert('Redirecionando para WhatsApp...');
   };
 
-  // Data mínima (hoje)
   const today = new Date().toISOString().split('T')[0];
 
   return (

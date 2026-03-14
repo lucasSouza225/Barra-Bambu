@@ -1,80 +1,96 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
+import { cardapioService } from '../../service/cardapioService';
 import { Link } from 'react-router-dom';
+import { FiStar } from 'react-icons/fi';
+import { IoRestaurant } from 'react-icons/io5';
 
-// Importe suas imagens
-import menu1 from '../../assets/menu-1.jpg';
-import menu2 from '../../assets/menu-2.jpg';
-import menu3 from '../../assets/menu-3.jpg';
-import menu4 from '../../assets/menu-4.jpg';
-import menu5 from '../../assets/menu-5.jpg';
-import menu6 from '../../assets/menu-6.jpg';
-import menu7 from '../../assets/menu-7.jpg';
-import menu8 from '../../assets/menu-8.jpg';
-import menu9 from '../../assets/menu-9.jpg';
-import menu10 from '../../assets/menu-10.jpg';
-import menu11 from '../../assets/menu-11.jpg';
-import menu12 from '../../assets/menu-12.jpg';
+const CardapioDestaques = () => {
+  const [destaques, setDestaques] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-const Cardapio = () => {
-  const menuItems = [
-    { id: 1, imagem: menu1, titulo: 'Prato Especial' },
-    { id: 2, imagem: menu2, titulo: 'Salmão Grelhado' },
-    { id: 3, imagem: menu3, titulo: 'Carne Assada' },
-    { id: 4, imagem: menu4, titulo: 'Frutos do Mar' },
-    { id: 5, imagem: menu5, titulo: 'Prato Executivo' },
-    { id: 6, imagem: menu6, titulo: 'Bebida Especial' },
-    { id: 7, imagem: menu7, titulo: 'Entrada' },
-    { id: 8, imagem: menu8, titulo: 'Bebida Refrescante' },
+  useEffect(() => {
+    carregarDestaques();
+  }, []);
 
-  ];
+  const carregarDestaques = async () => {
+    try {
+      setLoading(true);
+      const data = await cardapioService.listarDestaques();
+      setDestaques(data);
+    } catch (error) {
+      console.error('Erro ao carregar destaques:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-light-bg">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center text-dark-bg mb-12">
+            Destaques do Cardápio
+          </h2>
+          <div className="flex justify-center">
+            <IoRestaurant className="text-4xl text-primary animate-pulse" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (destaques.length === 0) {
+    return null;
+  }
 
   return (
-    <section id="cardapio" className="p-20 bg-white">
+    <section className="py-16 bg-light-bg">
       <div className="container mx-auto px-4">
+        <h2 className="text-4xl font-bold text-center text-dark-bg mb-4 flex items-center justify-center gap-2">
+          <FiStar className="text-yellow-500" />
+          Destaques do Cardápio
+          <FiStar className="text-yellow-500" />
+        </h2>
 
-        {/* Título com linha dourada */}
-        <div className="text-center mb-12">
-          <h2 className="font-['Georgia',serif] text-4xl text-dark-bg inline-block pb-3 border-b-2 border-primary">
-            Menu
-          </h2>
-        </div>
-
-        {/* Grid de itens do menu */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
-          {menuItems.map((item) => (
-            <div
-              key={item.id}
-              className="relative overflow-hidden rounded-lg h-60 cursor-pointer group
-             w-full sm:w-[95%] md:w-full mx-auto"
+        {/* Grid de imagens - só foto e título */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {destaques.map((item) => (
+            <Link
+              key={item._id}
+              to="/cardapio-publico"
+              className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500"
             >
-              {/* Imagem */}
-              <img
-                src={item.imagem}
-                alt={item.titulo}
-                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-115 group-hover:rotate-2"
-              />
-
-              {/* Overlay padrão (preto) */}
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:bg-[#4B2E20]/70">
-                <p className="text-white text-lg font-bold text-center px-4">
-                  {item.titulo}
-                </p>
+              {/* Apenas a imagem */}
+              <div className="aspect-square overflow-hidden">
+                {item.imagem ? (
+                  <img
+                    src={item.imagem}
+                    alt={item.nome}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://via.placeholder.com/400x400/38241B/FFD301?text=Erro';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <IoRestaurant className="text-4xl text-gray-400" />
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Botão Ver Cardápio */}
-        <div className="text-center">
-          <Link to="/cardapio-publico">
-            <button className="bg-primary text-dark-bg font-bold px-10 py-4 rounded-md cursor-pointer transition-all duration-300 shadow-md hover:bg-secondary hover:text-white hover:-translate-y-0.5 hover:shadow-xl">
-              Ver Cardápio
-            </button>
-          </Link>
+              {/* Apenas o título (overlay no hover) */}
+              <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                <h3 className="text-white text-lg font-bold">
+                  {item.nome}
+                </h3>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
   );
 };
 
-export default Cardapio;
+export default CardapioDestaques;

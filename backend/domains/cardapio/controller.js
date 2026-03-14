@@ -9,7 +9,6 @@ const __dirname = path.dirname(__filename);
 // Função para extrair nome do arquivo da URL
 const getFilenameFromUrl = (url) => {
     if (!url) return null;
-    // Ex: http://localhost:3000/uploads/imagem-1234567890.jpg
     const parts = url.split('/uploads/');
     return parts[1] || null;
 };
@@ -72,6 +71,25 @@ export const getItemById = async (req, res) => {
     }
 };
 
+// GET - Buscar itens em destaque (público)
+export const getDestaques = async (req, res) => {
+    try {
+        const destaques = await Cardapio.find({ 
+            destaque: true, 
+            disponivel: true 
+        })
+        .sort('-createdAt')
+        .limit(8);
+        
+        res.json(destaques);
+    } catch (error) {
+        res.status(500).json({ 
+            message: "Erro ao buscar destaques", 
+            error: error.message 
+        });
+    }
+};
+
 // POST - Criar novo item (admin)
 export const createItem = async (req, res) => {
     try {
@@ -104,12 +122,11 @@ export const createItem = async (req, res) => {
     }
 };
 
-// PUT - Atualizar item (admin) - COM DELETE DE IMAGEM ANTIGA
+// PUT - Atualizar item (admin) - CORRIGIDO
 export const updateItem = async (req, res) => {
     try {
         const { nome, descricao, preco, categoria, imagem, disponivel, destaque } = req.body;
         
-        // Buscar item atual para pegar imagem antiga
         const itemAtual = await Cardapio.findById(req.params.id);
         
         if (!itemAtual) {
@@ -125,10 +142,11 @@ export const updateItem = async (req, res) => {
             }
         }
 
+        // CORREÇÃO: { returnDocument: 'after' } em vez de { new: true }
         const itemAtualizado = await Cardapio.findByIdAndUpdate(
             req.params.id,
             { nome, descricao, preco, categoria, imagem, disponivel, destaque },
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
 
         res.json(itemAtualizado);
@@ -142,7 +160,7 @@ export const updateItem = async (req, res) => {
     }
 };
 
-// DELETE - Remover item (admin) - COM DELETE DE IMAGEM
+// DELETE - Remover item (admin)
 export const deleteItem = async (req, res) => {
     try {
         const itemRemovido = await Cardapio.findById(req.params.id);
@@ -151,7 +169,6 @@ export const deleteItem = async (req, res) => {
             return res.status(404).json({ message: "Item não encontrado" });
         }
 
-        // Deletar imagem física se existir
         const filename = getFilenameFromUrl(itemRemovido.imagem);
         let imagemDeletada = false;
         
@@ -159,7 +176,6 @@ export const deleteItem = async (req, res) => {
             imagemDeletada = deletarArquivo(filename);
         }
 
-        // Deletar do banco
         await Cardapio.findByIdAndDelete(req.params.id);
 
         res.json({ 
