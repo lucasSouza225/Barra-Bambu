@@ -3,11 +3,10 @@ import philosophyImg from '../../assets/philosophy.jpg';
 
 const Filosofia = () => {
   return (
-    <section className="p-20 bg-white">
+    <section className="p-5 bg-white">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-12.5 items-center">
           
-          {/* Texto */}
           <div className="space-y-5">
             <h2 className="text-2xl md:text-3xl lg:text-[32px] font-bold text-text-dark mb-5">
               Servimos sabores, momentos, sensações...
@@ -23,7 +22,6 @@ const Filosofia = () => {
             </p>
           </div>
 
-          {/* Imagem */}
           <div className="philosophy-image">
             <img 
               src={philosophyImg} 

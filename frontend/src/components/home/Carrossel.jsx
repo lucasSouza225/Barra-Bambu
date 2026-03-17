@@ -32,7 +32,6 @@ const Carrossel = () => {
     }
   };
 
-  // FUNÇÕES DE NAVEGAÇÃO
   const nextSlide = useCallback(() => {
     if (isTransitioning || slides.length === 0) return;
     setIsTransitioning(true);
@@ -54,7 +53,6 @@ const Carrossel = () => {
     setTimeout(() => setIsTransitioning(false), 500);
   };
 
-  // AUTO-PLAY CONTÍNUO - CORRIGIDO!
   useEffect(() => {
     if (slides.length === 0) return;
     
@@ -112,7 +110,6 @@ const Carrossel = () => {
         ))}
       </div>
 
-      {/* Botões de navegação */}
       {slides.length > 1 && (
         <>
           <button
@@ -147,7 +144,6 @@ const Carrossel = () => {
         </>
       )}
 
-      {/* Dots indicadores */}
       {slides.length > 1 && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-3">
           {slides.map((_, index) => (

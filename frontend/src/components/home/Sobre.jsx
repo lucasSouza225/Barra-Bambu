@@ -4,11 +4,10 @@ import welcomeImg from '../../assets/welcome.png';
 
 const Sobre = () => {
   return (
-    <section id="sobre" className="p-16 bg-light-bg">
+    <section id="sobre" className="p-5 bg-light-bg">
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           
-          {/* Imagem */}
           <div className="w-full lg:w-1/2">
             <div className="relative">
               <img 
@@ -16,12 +15,10 @@ const Sobre = () => {
                 alt="Bem-vindo ao Barra Bambu" 
                 className="w-full h-auto rounded-lg shadow-xl"
               />
-              {/* Elemento decorativo opcional */}
               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/20 rounded-full -z-10"></div>
             </div>
           </div>
 
-          {/* Texto */}
           <div className="w-full lg:w-1/2 space-y-6">
             <h2 className="text-3xl md:text-4xl font-bold text-dark-bg flex items-center flex-wrap gap-2">
               Bem-vindo ao 
@@ -47,7 +44,6 @@ const Sobre = () => {
               </p>
             </div>
 
-            {/* Ícones Sociais */}
             <div className="flex gap-4 pt-4">
               <a 
                 href="#" 

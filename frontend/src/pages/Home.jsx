@@ -1,7 +1,7 @@
 import React from 'react'
 import Carrossel from '../components/home/Carrossel'
 import Sobre from '../components/home/Sobre'
-import Promo from '../components/home/Promo'
+import Servicos from '../components/home/Servicos'
 import Cardapio from '../components/home/Cardapio'
 import Filosofia from '../components/home/Filosofia'
 import Galeria from '../components/home/Galeria'
@@ -14,7 +14,7 @@ const Home = () => {
     <main className='w-full overflow-x-hidden '>
         <Carrossel />
         <Sobre />
-        <Promo />
+        <Servicos />
         <Cardapio />
         <Filosofia />
         <Galeria />

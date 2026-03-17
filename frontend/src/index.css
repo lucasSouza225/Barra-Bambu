@@ -61,7 +61,6 @@
   animation-delay: 0.4s;
 }
 
-/* Scroll suave para toda a página */
 html {
   scroll-behavior: smooth;
 }

@@ -37,7 +37,6 @@ const FormularioEntrega = ({ aberto, onClose, onSubmit }) => {
           </button>
         </div>
 
-        {/* Formulário */}
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cardapioService } from '../../service/cardapioService';
 import { Link } from 'react-router-dom';
-import { FiStar } from 'react-icons/fi';
+import { FiStar, FiArrowRight } from 'react-icons/fi';
 import { IoRestaurant } from 'react-icons/io5';
 
 const CardapioDestaques = () => {
@@ -26,13 +26,13 @@ const CardapioDestaques = () => {
 
   if (loading) {
     return (
-      <section className="py-16 bg-light-bg">
+      <section className="py-12 md:py-16 bg-light-bg">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-dark-bg mb-12">
+          <h2 className="text-2xl md:text-4xl font-bold text-center text-dark-bg mb-8 md:mb-12">
             Destaques do Cardápio
           </h2>
           <div className="flex justify-center">
-            <IoRestaurant className="text-4xl text-primary animate-pulse" />
+            <IoRestaurant className="text-3xl md:text-4xl text-primary animate-pulse" />
           </div>
         </div>
       </section>
@@ -44,49 +44,67 @@ const CardapioDestaques = () => {
   }
 
   return (
-    <section className="py-16 bg-light-bg">
+    <section className="py-12 md:py-16 bg-light-bg">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center text-dark-bg mb-4 flex items-center justify-center gap-2">
-          <FiStar className="text-yellow-500" />
-          Destaques do Cardápio
-          <FiStar className="text-yellow-500" />
-        </h2>
+        {/* Título responsivo */}
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-bg flex items-center justify-center gap-2 flex-wrap">
+            <FiStar className="text-yellow-500 text-xl sm:text-2xl md:text-3xl" />
+            Destaques do Cardápio
+            <FiStar className="text-yellow-500 text-xl sm:text-2xl md:text-3xl" />
+          </h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-2 max-w-2xl mx-auto">
+            Os pratos mais amados pelos nossos clientes
+          </p>
+        </div>
 
-        {/* Grid de imagens - só foto e título */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {destaques.map((item) => (
+        {/* Grid responsivo */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
+          {destaques.slice(0, 6).map((item) => ( // Limite de 6 itens 
             <Link
               key={item._id}
               to="/cardapio-publico"
-              className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500"
+              className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
             >
-              {/* Apenas a imagem */}
-              <div className="aspect-square overflow-hidden">
+              {/* Container da imagem com tamanho responsivo */}
+              <div className="aspect-square overflow-hidden bg-gray-100">
                 {item.imagem ? (
                   <img
                     src={item.imagem}
                     alt={item.nome}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/400x400/38241B/FFD301?text=Erro';
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center"><IoRestaurant class="text-3xl text-gray-400" /></div>';
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <IoRestaurant className="text-4xl text-gray-400" />
+                  <div className="w-full h-full flex items-center justify-center">
+                    <IoRestaurant className="text-3xl text-gray-400" />
                   </div>
                 )}
               </div>
 
-              {/* Apenas o título (overlay no hover) */}
-              <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                <h3 className="text-white text-lg font-bold">
+              {/* Overlay com nome do prato (aparece no hover) */}
+              <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2 sm:p-3">
+                <h3 className="text-white text-xs sm:text-sm md:text-base font-bold line-clamp-2">
                   {item.nome}
                 </h3>
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Botão para ver cardápio completo */}
+        <div className="text-center mt-8 md:mt-12">
+          <Link
+            to="/cardapio-publico"
+            className="inline-flex items-center gap-2 bg-primary text-dark-bg px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-bold text-sm sm:text-base hover:bg-secondary transition-colors group"
+          >
+            Ver Cardápio Completo
+            <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
     </section>

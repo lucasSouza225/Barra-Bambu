@@ -16,8 +16,7 @@ const CarrinhoLateral = () => {
     removerItem,
     atualizarQuantidade,
     totalCarrinho,
-    limparCarrinho, // ← IMPORTANTE: importar a função
-    enviarWhatsApp
+    limparCarrinho, 
   } = useCarrinho();
 
   const totalItens = itensCarrinho.reduce((acc, item) => acc + item.quantidade, 0);
@@ -53,7 +52,6 @@ const CarrinhoLateral = () => {
     message += `Telefone: ${dadosEntrega.telefone}\n`;
     message += "\nPor favor, confirme a disponibilidade, o valor total (incluindo taxa de entrega) e o prazo.";
     
-    // Enviar para WhatsApp
     const numero = '551136340295';
     const url = `https://wa.me/${numero}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
@@ -69,7 +67,6 @@ const CarrinhoLateral = () => {
 
   return (
     <>
-      {/* Ícone flutuante */}
       <button
         onClick={() => setAberto(true)}
         className="fixed bottom-6 right-6 bg-primary text-dark-bg p-4 rounded-full shadow-lg hover:bg-secondary transition-colors z-40"
@@ -84,7 +81,6 @@ const CarrinhoLateral = () => {
         </div>
       </button>
 
-      {/* Carrinho lateral */}
       <div className={`fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
         aberto ? 'translate-x-0' : 'translate-x-full'
       }`}>
@@ -190,7 +186,6 @@ const CarrinhoLateral = () => {
         </div>
       </div>
 
-      {/* Modal de entrega */}
       <FormularioEntregaSimples
         aberto={mostrarFormEntrega}
         onClose={() => setMostrarFormEntrega(false)}

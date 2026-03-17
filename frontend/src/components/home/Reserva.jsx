@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import reservationImg from '../../assets/reservation.jpg';
 
 const Reserva = () => {
-  // Estado para os campos do formulário
   const [formData, setFormData] = useState({
     name: '',
     date: '',
@@ -14,7 +13,7 @@ const Reserva = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const whatsappNumber = '5511936340295'; // Exemplo: 55 (Brasil) 11 (DDD) 936340295
+  const whatsappNumber = '5511936340295'; 
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -76,14 +75,13 @@ const Reserva = () => {
     
     setIsSubmitting(false);
     
-    // Mensagem de sucesso
     alert('Redirecionando para WhatsApp...');
   };
 
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <section id="reserva" className="p-20 bg-light-bg">
+    <section id="reserva" className="p-5 bg-light-bg">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-12.5 items-center">
           

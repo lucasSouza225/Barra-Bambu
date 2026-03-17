@@ -20,7 +20,6 @@ const Header = () => {
   return (
     <header className="bg-[#38241B] text-white py-3 sticky top-0 z-50 shadow-lg">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        {/* Logo */}
         <Link to="/" className="logo">
           <img 
             src={logo} 
@@ -29,7 +28,6 @@ const Header = () => {
           />
         </Link>
 
-        {/* Hamburger Menu Button (Mobile) */}
         <button 
           className="md:hidden flex flex-col justify-center items-center w-10 h-10"
           onClick={toggleMenu}
@@ -40,7 +38,6 @@ const Header = () => {
           <span className={`bg-white h-0.5 w-6 transition-all ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
         </button>
 
-        {/* Navigation Menu - Desktop */}
         <nav className="hidden md:block">
           <ul className="flex space-x-6 lg:space-x-8">
             {navItems.map((item) => (
@@ -57,7 +54,6 @@ const Header = () => {
         </nav>
       </div>
 
-      {/* Mobile Menu */}
       <div className={`md:hidden ${menuOpen ? 'block' : 'hidden'} bg-[#38241B] py-4`}>
         <ul className="flex flex-col items-center space-y-4">
           {navItems.map((item) => (

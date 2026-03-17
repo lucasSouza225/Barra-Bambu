@@ -9,7 +9,7 @@ const Footer = () => {
     <footer id="contato" className="bg-dark-bg text-white pt-10 pb-2.5 w-full overflow-x-hidden">
       <div className="container mx-auto px-4 max-w-7xl">
         
-        {/* Grid do Footer - Ajustado para melhor responsividade */}
+        {/* Grid do Footer */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12 mb-8">
           
           {/* Coluna 1 - Horários */}
@@ -72,18 +72,21 @@ const Footer = () => {
               LOCALIZAÇÃO
             </h3>
             <div className="mt-4 space-y-3">
-              {/* Mapa - Centralizado em mobile */}
+              {/* Mapa Responsivo */}
               <div className="flex justify-center md:justify-start">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m23!1m12!1m3!1d117957.20424447498!2d-48.64236962131136!3d-22.498080551877713!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m8!3e6!4m0!4m5!1s0x94c74f62f498dea7%3A0xbd03731ed15aa3f6!2sAv.%20Pedro%20Ometto%2C%2088%20-%20Centro%2C%20Barra%20Bonita%20-%20SP%2C%2017340-000!3m2!1d-22.4981015!2d-48.559968!5e0!3m2!1spt-BR!2sbr!4v1762109039380!5m2!1spt-BR!2sbr" 
-                  width="100%" 
-                  height="120" 
-                  style={{ border: 0, maxWidth: '250px' }} 
-                  allowFullScreen 
-                  loading="lazy" 
-                  title="Localização do Barra Bambu"
-                  className="rounded-lg mx-auto md:mx-0"
-                />
+                <div className="w-full max-w-[300px] md:max-w-[250px]">
+                  <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m24!1m8!1m3!1d943657.6308989682!2d-48.64237000000001!3d-22.498081000000003!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x94c74f62f498dea7%3A0xbd03731ed15aa3f6!2sRestaurante%20e%20Choperia%20Bambu%2C%20Av.%20Pedro%20Ometto%2C%2088%20-%20Centro%2C%20Barra%20Bonita%20-%20SP%2C%2017340-000!3m2!1d-22.4981015!2d-48.559968!4m5!1s0x94c74f62f498dea7%3A0xbd03731ed15aa3f6!2sRestaurante%20e%20Choperia%20Bambu%2C%20Av.%20Pedro%20Ometto%2C%2088%20-%20Centro%2C%20Barra%20Bonita%20-%20SP%2C%2017340-000!3m2!1d-22.4981015!2d-48.559968!5e0!3m2!1spt-BR!2sbr!4v1773710364225!5m2!1spt-BR!2sbr" 
+                    width="100%" 
+                    height="180" 
+                    style={{ border: 0 }} 
+                    allowFullScreen 
+                    loading="lazy" 
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Localização do Barra Bambu"
+                    className="rounded-lg shadow-md"
+                  />
+                </div>
               </div>
               
               {/* Endereço */}
