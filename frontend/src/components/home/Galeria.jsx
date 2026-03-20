@@ -6,6 +6,7 @@ import { IoImages } from 'react-icons/io5';
 const Galeria = () => {
   const [imagens, setImagens] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categoriaAtiva, setCategoriaAtiva] = useState('todas'); // ← VOLTOU
   const [modalAberto, setModalAberto] = useState(false);
   const [imagemSelecionada, setImagemSelecionada] = useState(null);
   const [indiceAtual, setIndiceAtual] = useState(0);
@@ -14,9 +15,23 @@ const Galeria = () => {
   const [limite, setLimite] = useState(8);
   const [carregandoMais, setCarregandoMais] = useState(false);
 
+  // Categorias (VOLTOU)
+  const categorias = [
+    { id: 'todas', nome: 'Todas', icon: '🖼️' },
+    { id: 'ambiente', nome: 'Ambiente', icon: '🏠' },
+    { id: 'eventos', nome: 'Eventos', icon: '🎉' },
+    { id: 'pratos', nome: 'Pratos', icon: '🍽️' },
+    { id: 'outros', nome: 'Outros', icon: '📸' }
+  ];
+
   useEffect(() => {
     carregarImagens();
   }, []);
+
+  // Resetar limite quando mudar de categoria
+  useEffect(() => {
+    setLimite(8);
+  }, [categoriaAtiva]);
 
   const carregarImagens = async () => {
     try {
@@ -30,8 +45,14 @@ const Galeria = () => {
     }
   };
 
-  const imagensParaMostrar = imagens.slice(0, limite);
-  const temMaisImagens = limite < imagens.length;
+  // Filtrar imagens por categoria (VOLTOU)
+  const imagensFiltradas = categoriaAtiva === 'todas'
+    ? imagens
+    : imagens.filter(img => img.categoria === categoriaAtiva);
+
+  // Aplicar limite nas imagens filtradas
+  const imagensParaMostrar = imagensFiltradas.slice(0, limite);
+  const temMaisImagens = limite < imagensFiltradas.length;
 
   const carregarMais = () => {
     setCarregandoMais(true);
@@ -42,8 +63,10 @@ const Galeria = () => {
   };
 
   const abrirModal = (imagem, index) => {
+    // Índice real nas imagens filtradas
+    const indexReal = imagensFiltradas.findIndex(img => img._id === imagem._id);
     setImagemSelecionada(imagem);
-    setIndiceAtual(index);
+    setIndiceAtual(indexReal);
     setModalAberto(true);
     document.body.style.overflow = 'hidden';
   };
@@ -55,15 +78,15 @@ const Galeria = () => {
   };
 
   const proximaImagem = () => {
-    const novoIndice = (indiceAtual + 1) % imagens.length;
+    const novoIndice = (indiceAtual + 1) % imagensFiltradas.length;
     setIndiceAtual(novoIndice);
-    setImagemSelecionada(imagens[novoIndice]);
+    setImagemSelecionada(imagensFiltradas[novoIndice]);
   };
 
   const imagemAnterior = () => {
-    const novoIndice = (indiceAtual - 1 + imagens.length) % imagens.length;
+    const novoIndice = (indiceAtual - 1 + imagensFiltradas.length) % imagensFiltradas.length;
     setIndiceAtual(novoIndice);
-    setImagemSelecionada(imagens[novoIndice]);
+    setImagemSelecionada(imagensFiltradas[novoIndice]);
   };
 
   useEffect(() => {
@@ -120,6 +143,30 @@ const Galeria = () => {
             </p>
           </div>
 
+          {/* FILTROS POR CATEGORIA - VOLTOU! */}
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-12">
+            {categorias.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setCategoriaAtiva(cat.id)}
+                className={`px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm transition-all duration-300 flex items-center gap-1 md:gap-2 ${
+                  categoriaAtiva === cat.id
+                    ? 'bg-primary text-dark-bg font-bold shadow-lg scale-105'
+                    : 'bg-white text-gray-600 hover:bg-primary/20'
+                }`}
+              >
+                <span>{cat.icon}</span>
+                <span className="hidden sm:inline">{cat.nome}</span>
+                <span className="sm:hidden">{cat.nome.substring(0, 3)}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Contador de imagens */}
+          <div className="text-center mb-4 text-sm text-gray-500">
+            Mostrando {imagensParaMostrar.length} de {imagensFiltradas.length} fotos
+          </div>
+
           {/* Grid responsivo de imagens */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-4">
             {imagensParaMostrar.map((imagem, index) => (
@@ -145,7 +192,12 @@ const Galeria = () => {
                   </div>
                 )}
 
-                {/* Overlay simples no hover (só pra mostrar que é clicável) */}
+                {/* Badge de categoria (opcional) */}
+                <div className="absolute top-2 left-2 bg-dark-bg/70 text-white text-[10px] md:text-xs px-2 py-1 rounded-full">
+                  {categorias.find(c => c.id === imagem.categoria)?.icon} {imagem.categoria}
+                </div>
+
+                {/* Overlay no hover */}
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
                   <span className="text-white text-xs md:text-sm font-medium truncate">
                     {imagem.titulo}
@@ -171,7 +223,7 @@ const Galeria = () => {
                 ) : (
                   <>
                     <span>📸</span>
-                    Ver Mais Fotos ({imagens.length - limite} restantes)
+                    Ver Mais Fotos ({imagensFiltradas.length - limite} restantes)
                   </>
                 )}
               </button>
@@ -192,7 +244,7 @@ const Galeria = () => {
           </button>
 
           {/* Navegação */}
-          {imagens.length > 1 && (
+          {imagensFiltradas.length > 1 && (
             <>
               <button
                 onClick={imagemAnterior}
@@ -226,7 +278,7 @@ const Galeria = () => {
               {imagemSelecionada.titulo}
             </h3>
             <p className="text-gray-400 text-xs md:text-sm mt-2">
-              {indiceAtual + 1} / {imagens.length}
+              {categorias.find(c => c.id === imagemSelecionada.categoria)?.icon} {imagemSelecionada.categoria} • {indiceAtual + 1} / {imagensFiltradas.length}
             </p>
           </div>
         </div>
