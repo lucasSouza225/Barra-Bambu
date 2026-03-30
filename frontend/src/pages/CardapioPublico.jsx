@@ -85,8 +85,8 @@ const CardapioPublico = () => {
   }
 
   return (
-    <div className="min-h-screen bg-light-bg p-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-light-bg p-2">
+      <div className="container mx-auto px-1">
         <h1 className="text-4xl font-bold text-center text-dark-bg mb-12">
           Nosso Cardápio Completo
         </h1>

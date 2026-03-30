@@ -131,12 +131,12 @@ const DashboardAdmin = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-dark-bg flex items-center gap-2">
           <IoCafe className="text-primary" />
-          Dashboard Administrativo
+          Painel Administrativo
         </h1>
         
         <button 
           onClick={carregarTodosDados}
-          className="bg-primary/10 text-primary px-4 py-2 rounded-lg hover:bg-primary/20 transition-colors flex items-center gap-2"
+          className="bg-primary/10 text-dark-bg px-4 py-2 rounded-lg hover:bg-primary/30 transition-colors flex items-center gap-2"
           title="Atualizar dados"
         >
           🔄 Atualizar
@@ -198,28 +198,28 @@ const DashboardAdmin = () => {
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={irParaNovoItem}
-              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left"
+              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/30 transition-colors text-left"
             >
               <p className="font-semibold text-dark-bg">Adicionar Item</p>
               <p className="text-xs text-gray-500">Novo prato no cardápio</p>
             </button>
             <button 
               onClick={irParaCardapio}
-              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left"
+              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/30 transition-colors text-left"
             >
               <p className="font-semibold text-dark-bg">Gerenciar Destaques</p>
               <p className="text-xs text-gray-500">Itens em destaque</p>
             </button>
             <button 
               onClick={irParaCardapio}
-              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left"
+              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/30 transition-colors text-left"
             >
               <p className="font-semibold text-dark-bg">Ver Cardápio</p>
               <p className="text-xs text-gray-500">Visualizar todos os itens</p>
             </button>
             <button 
               onClick={irParaCardapio}
-              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors text-left"
+              className="p-3 bg-primary/10 rounded-lg hover:bg-primary/30 transition-colors text-left"
             >
               <p className="font-semibold text-dark-bg">Categorias</p>
               <p className="text-xs text-gray-500">Gerenciar categorias</p>

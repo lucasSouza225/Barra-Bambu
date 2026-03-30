@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { FaWhatsapp, FaInstagram, FaFacebook, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Footer = () => {
@@ -31,7 +30,7 @@ const Footer = () => {
             </h3>
             <div className="space-y-3 mt-4">
               <p className="text-sm text-text-light leading-relaxed flex items-center justify-center md:justify-start gap-2">
-                <FaWhatsapp className="text-primary flex-shrink-0" />
+                <FaWhatsapp className="text-primary shrink-0" />
                 <a 
                   href="https://wa.me/551136340295" 
                   target="_blank" 
@@ -42,7 +41,7 @@ const Footer = () => {
                 </a>
               </p>
               <p className="text-sm text-text-light leading-relaxed flex items-center justify-center md:justify-start gap-2">
-                <FaInstagram className="text-primary flex-shrink-0" />
+                <FaInstagram className="text-primary shrink-0" />
                 <a 
                   href="https://instagram.com/barrabambuoficial" 
                   target="_blank" 
@@ -53,7 +52,7 @@ const Footer = () => {
                 </a>
               </p>
               <p className="text-sm text-text-light leading-relaxed flex items-center justify-center md:justify-start gap-2">
-                <FaFacebook className="text-primary flex-shrink-0" />
+                <FaFacebook className="text-primary shrink-0" />
                 <a 
                   href="https://facebook.com/barrabambu" 
                   target="_blank" 
@@ -73,8 +72,8 @@ const Footer = () => {
             </h3>
             <div className="mt-4 space-y-3">
               {/* Mapa Responsivo */}
-              <div className="flex justify-center md:justify-start">
-                <div className="w-full max-w-[300px] md:max-w-[250px]">
+              <div className="flex justify-center md:justify-start">' '
+                <div className="w-full max-w-300px md:max-w-250px">
                   <iframe 
                     src="https://www.google.com/maps/embed?pb=!1m24!1m8!1m3!1d943657.6308989682!2d-48.64237000000001!3d-22.498081000000003!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x94c74f62f498dea7%3A0xbd03731ed15aa3f6!2sRestaurante%20e%20Choperia%20Bambu%2C%20Av.%20Pedro%20Ometto%2C%2088%20-%20Centro%2C%20Barra%20Bonita%20-%20SP%2C%2017340-000!3m2!1d-22.4981015!2d-48.559968!4m5!1s0x94c74f62f498dea7%3A0xbd03731ed15aa3f6!2sRestaurante%20e%20Choperia%20Bambu%2C%20Av.%20Pedro%20Ometto%2C%2088%20-%20Centro%2C%20Barra%20Bonita%20-%20SP%2C%2017340-000!3m2!1d-22.4981015!2d-48.559968!5e0!3m2!1spt-BR!2sbr!4v1773710364225!5m2!1spt-BR!2sbr" 
                     width="100%" 
@@ -91,12 +90,12 @@ const Footer = () => {
               
               {/* Endereço */}
               <p className="text-sm text-text-light leading-relaxed flex items-start justify-center md:justify-start gap-2">
-                <FaMapMarkerAlt className="text-primary mt-1 flex-shrink-0" />
+                <FaMapMarkerAlt className="text-primary mt-1 shrink-0" />
                 <a 
                   href="https://maps.google.com/?q=Av.+Pedro+Ometto,+88+-+Centro,+Barra+Bonita+-+SP" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="hover:text-primary transition-colors text-left break-words"
+                  className="hover:text-primary transition-colors text-left wrap-break-word"
                 >
                   Av. Pedro Ometto, 88 - Centro, Barra Bonita - SP
                 </a>

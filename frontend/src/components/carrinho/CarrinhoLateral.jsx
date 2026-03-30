@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { useCarrinho } from '../../contexts/carrinho/CarrinhoContext';
-import { FiShoppingCart } from 'react-icons/fi';
-import { IoRestaurant, IoClose } from 'react-icons/io5';
-import { FaWhatsapp } from 'react-icons/fa';
-import { MdDelete } from 'react-icons/md';
-import FormularioEntregaSimples from './FormularioEntrega';
+import { useState } from "react";
+import { useCarrinho } from "../../contexts/carrinho/CarrinhoContext";
+import { FiShoppingCart } from "react-icons/fi";
+import { IoRestaurant, IoClose } from "react-icons/io5";
+import { FaWhatsapp } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
+import FormularioEntrega from "./FormularioEntrega";
 
 const CarrinhoLateral = () => {
   const [aberto, setAberto] = useState(false);
@@ -16,53 +16,83 @@ const CarrinhoLateral = () => {
     removerItem,
     atualizarQuantidade,
     totalCarrinho,
-    limparCarrinho, 
+    limparCarrinho,
   } = useCarrinho();
 
-  const totalItens = itensCarrinho.reduce((acc, item) => acc + item.quantidade, 0);
+  const totalItens = itensCarrinho.reduce(
+    (acc, item) => acc + item.quantidade,
+    0,
+  );
 
   const formatarPreco = (preco) => {
-    return preco.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return preco.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     });
+  };
+
+  // FUNÇÃO PARA FORMATAR FORMA DE PAGAMENTO
+  const formatarPagamento = (forma) => {
+    switch (forma) {
+      case "dinheiro":
+        return "Dinheiro";
+      case "cartao":
+        return "Cartão";
+      case "pix":
+        return "Pix";
+      default:
+        return forma;
+    }
   };
 
   const handleFinalizarPedido = (dadosEntrega) => {
     let message = "Olá! Gostaria de fazer um pedido para entrega:\n\n";
-    message += "--- Detalhes do Pedido ---\n";
-    
-    itensCarrinho.forEach(item => {
-      const itemTotal = item.preco * item.quantidade;
-      message += `${item.quantidade}x - ${item.nome} (R$ ${itemTotal.toFixed(2).replace('.', ',')})\n`;
-    });
-    
-    message += `\nTotal do Pedido: R$ ${totalCarrinho.toFixed(2).replace('.', ',')}`;
-    
-    if (observacoes) {
-      message += `\n\nObs: ${observacoes}`;
-    }
-    
-    message += "\n\n--- Dados para Entrega ---\n";
-    message += `Rua: ${dadosEntrega.rua}, Nº: ${dadosEntrega.numero}\n`;
-    message += `Bairro: ${dadosEntrega.bairro}\n`;
-    if (dadosEntrega.complemento) {
-      message += `Complemento: ${dadosEntrega.complemento}\n`;
-    }
-    message += `Telefone: ${dadosEntrega.telefone}\n`;
-    message += "\nPor favor, confirme a disponibilidade, o valor total (incluindo taxa de entrega) e o prazo.";
-    
-    const numero = '551136340295';
-    const url = `https://wa.me/${numero}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
-    
-    limparCarrinho();
-    
+    message += "📋 *DETALHES DO PEDIDO*\n";
 
+    itensCarrinho.forEach((item) => {
+      const itemTotal = item.preco * item.quantidade;
+      message += `• ${item.quantidade}x ${item.nome}\n`;
+      message += `  R$ ${itemTotal.toFixed(2).replace(".", ",")}\n\n`;
+    });
+
+    message += `💰 *TOTAL: R$ ${totalCarrinho.toFixed(2).replace(".", ",")}*\n`;
+
+    if (observacoes) {
+      message += `📝 *Observações:*\n${observacoes}\n\n`;
+    }
+
+    message += "📍 *DADOS PARA ENTREGA*\n";
+    message += `🏠 Rua: ${dadosEntrega.rua}, ${dadosEntrega.numero}\n`;
+    message += `📍 Bairro: ${dadosEntrega.bairro}\n`;
+    if (dadosEntrega.complemento) {
+      message += `📌 Complemento: ${dadosEntrega.complemento}\n`;
+    }
+    message += `📱 Telefone: ${dadosEntrega.telefone}\n\n`;
+
+    message += "💳 *FORMA DE PAGAMENTO*\n";
+    message += `${formatarPagamento(dadosEntrega.formaPagamento)}\n`;
+    
+    // Se for dinheiro e tiver troco
+    if (dadosEntrega.formaPagamento === "dinheiro" && dadosEntrega.troco) {
+      const trocoNum = parseFloat(dadosEntrega.troco);
+      if (trocoNum > 0) {
+        message += `Troco para: R$ ${trocoNum.toFixed(2).replace(".", ",")}\n`;
+      }
+    }
+
+    message += "✅ *Confirme a disponibilidade*\n";
+    message += "e o prazo de entrega!\n";
+    message += "_Obrigado pela preferência!_ 🙏";
+
+    const numero = "551136340295";
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+
+    limparCarrinho();
     setMostrarFormEntrega(false);
     setAberto(false);
-    
-    alert('Pedido enviado com sucesso!');
+
+    alert("✅ Pedido enviado com sucesso!");
   };
 
   return (
@@ -81,9 +111,11 @@ const CarrinhoLateral = () => {
         </div>
       </button>
 
-      <div className={`fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
-        aberto ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div
+        className={`fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
+          aberto ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         <div className="bg-dark-bg text-white p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold">Seu Pedido</h2>
           <button
@@ -106,7 +138,11 @@ const CarrinhoLateral = () => {
                 <div key={item._id} className="flex gap-3 border-b pb-3">
                   <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden shrink-0">
                     {item.imagem ? (
-                      <img src={item.imagem} alt={item.nome} className="w-full h-full object-cover" />
+                      <img
+                        src={item.imagem}
+                        alt={item.nome}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <IoRestaurant className="text-2xl text-gray-400" />
@@ -116,18 +152,26 @@ const CarrinhoLateral = () => {
 
                   <div className="flex-1">
                     <h3 className="font-bold text-dark-bg">{item.nome}</h3>
-                    <p className="text-sm text-gray-600">{formatarPreco(item.preco)} cada</p>
-                    
+                    <p className="text-sm text-gray-600">
+                      {formatarPreco(item.preco)} cada
+                    </p>
+
                     <div className="flex items-center gap-2 mt-2">
                       <button
-                        onClick={() => atualizarQuantidade(item._id, item.quantidade - 1)}
+                        onClick={() =>
+                          atualizarQuantidade(item._id, item.quantidade - 1)
+                        }
                         className="w-6 h-6 bg-gray-200 rounded hover:bg-gray-300 flex items-center justify-center"
                       >
                         -
                       </button>
-                      <span className="font-bold w-6 text-center">{item.quantidade}</span>
+                      <span className="font-bold w-6 text-center">
+                        {item.quantidade}
+                      </span>
                       <button
-                        onClick={() => atualizarQuantidade(item._id, item.quantidade + 1)}
+                        onClick={() =>
+                          atualizarQuantidade(item._id, item.quantidade + 1)
+                        }
                         className="w-6 h-6 bg-gray-200 rounded hover:bg-gray-300 flex items-center justify-center"
                       >
                         +
@@ -141,7 +185,9 @@ const CarrinhoLateral = () => {
                     </div>
 
                     {item.observacao && (
-                      <p className="text-xs text-gray-500 mt-1">Obs: {item.observacao}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Obs: {item.observacao}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -152,7 +198,9 @@ const CarrinhoLateral = () => {
 
         {itensCarrinho.length > 0 && (
           <div className="p-4 border-t">
-            <label className="block text-gray-700 mb-2">Observações gerais</label>
+            <label className="block text-gray-700 mb-2">
+              Observações gerais
+            </label>
             <textarea
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
@@ -176,8 +224,8 @@ const CarrinhoLateral = () => {
             disabled={itensCarrinho.length === 0}
             className={`w-full bg-green-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors ${
               itensCarrinho.length === 0
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-green-700'
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-green-700"
             }`}
           >
             <FaWhatsapp className="text-lg" />
@@ -186,10 +234,11 @@ const CarrinhoLateral = () => {
         </div>
       </div>
 
-      <FormularioEntregaSimples
+      <FormularioEntrega
         aberto={mostrarFormEntrega}
         onClose={() => setMostrarFormEntrega(false)}
         onSubmit={handleFinalizarPedido}
+        totalPedido={totalCarrinho}
       />
     </>
   );

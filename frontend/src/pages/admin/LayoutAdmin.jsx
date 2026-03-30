@@ -38,7 +38,7 @@ const LayoutAdmin = ({ user, setUser }) => {
   const menuItems = [
     { 
       path: '/admin', 
-      label: 'Dashboard', 
+      label: 'Painel Administrativo', 
       icon: <MdDashboard className="text-xl" />, 
       end: true 
     },

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { galeriaService } from '../../service/galeriaService';
-import { FiImage, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiImage, FiX, FiChevronLeft, FiChevronRight, FiStar } from 'react-icons/fi';
 import { IoImages } from 'react-icons/io5';
 
 const Galeria = () => {
@@ -63,7 +63,6 @@ const Galeria = () => {
   };
 
   const abrirModal = (imagem, index) => {
-    // Índice real nas imagens filtradas
     const indexReal = imagensFiltradas.findIndex(img => img._id === imagem._id);
     setImagemSelecionada(imagem);
     setIndiceAtual(indexReal);
@@ -99,7 +98,7 @@ const Galeria = () => {
 
   if (loading) {
     return (
-      <section className="py-12 md:py-16 bg-light-bg">
+      <section id='galeria' className="py-12 md:py-16 bg-light-bg">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-dark-bg mb-8 md:mb-12">
             Nossa Galeria
@@ -131,13 +130,15 @@ const Galeria = () => {
 
   return (
     <>
-      <section className="py-12 md:py-16 bg-light-bg">
+      <section id='galeria' className="py-12 md:py-16 bg-light-bg">
         <div className="container mx-auto px-4">
           {/* Título responsivo */}
           <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-dark-bg mb-2">
-              Nossa Galeria
-            </h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-bg flex items-center justify-center gap-2 flex-wrap">
+                        <FiStar className="text-yellow-500 text-xl sm:text-2xl md:text-3xl" />
+                        Nossa Galeria
+                        <FiStar className="text-yellow-500 text-xl sm:text-2xl md:text-3xl" />
+                      </h2>
             <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
               Momentos especiais do nosso espaço
             </p>
@@ -160,11 +161,6 @@ const Galeria = () => {
                 <span className="sm:hidden">{cat.nome.substring(0, 3)}</span>
               </button>
             ))}
-          </div>
-
-          {/* Contador de imagens */}
-          <div className="text-center mb-4 text-sm text-gray-500">
-            Mostrando {imagensParaMostrar.length} de {imagensFiltradas.length} fotos
           </div>
 
           {/* Grid responsivo de imagens */}

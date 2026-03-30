@@ -26,8 +26,8 @@ const CardapioDestaques = () => {
 
   if (loading) {
     return (
-      <section className="py-12 md:py-16 bg-light-bg">
-        <div className="container mx-auto px-4">
+      <section id="cardapio" className="py-12 md:py-16 bg-light-bg">
+        <div className="container mx-auto px-2">
           <h2 className="text-2xl md:text-4xl font-bold text-center text-dark-bg mb-8 md:mb-12">
             Destaques do Cardápio
           </h2>
@@ -44,7 +44,7 @@ const CardapioDestaques = () => {
   }
 
   return (
-    <section className="py-12 md:py-16 bg-light-bg">
+    <section id="cardapio" className="py-12 md:py-16 bg-light-bg">
       <div className="container mx-auto px-4">
         {/* Título responsivo */}
         <div className="text-center mb-8 md:mb-12">
