@@ -72,7 +72,7 @@ const Footer = () => {
             </h3>
             <div className="mt-4 space-y-3">
               {/* Mapa Responsivo */}
-              <div className="flex justify-center md:justify-start">' '
+              <div className="flex justify-center md:justify-start">
                 <div className="w-full max-w-300px md:max-w-250px">
                   <iframe 
                     src="https://www.google.com/maps/embed?pb=!1m24!1m8!1m3!1d943657.6308989682!2d-48.64237000000001!3d-22.498081000000003!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x94c74f62f498dea7%3A0xbd03731ed15aa3f6!2sRestaurante%20e%20Choperia%20Bambu%2C%20Av.%20Pedro%20Ometto%2C%2088%20-%20Centro%2C%20Barra%20Bonita%20-%20SP%2C%2017340-000!3m2!1d-22.4981015!2d-48.559968!4m5!1s0x94c74f62f498dea7%3A0xbd03731ed15aa3f6!2sRestaurante%20e%20Choperia%20Bambu%2C%20Av.%20Pedro%20Ometto%2C%2088%20-%20Centro%2C%20Barra%20Bonita%20-%20SP%2C%2017340-000!3m2!1d-22.4981015!2d-48.559968!5e0!3m2!1spt-BR!2sbr!4v1773710364225!5m2!1spt-BR!2sbr" 

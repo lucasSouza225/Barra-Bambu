@@ -48,7 +48,7 @@ function App() {
             {/* Rotas PÚBLICAS */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginAdmin setUser={setUser} />} />
-            <Route path="/cardapio-publico" element={<CardapioPublico />} /> {/* ← AQUI! Fora do admin */}
+            <Route path="/cardapio-publico" element={<CardapioPublico />} /> 
             
             {/* Rotas ADMIN (protegidas) */}
             <Route path="/admin" element={
