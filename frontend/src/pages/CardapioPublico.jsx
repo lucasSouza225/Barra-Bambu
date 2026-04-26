@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { cardapioService } from '../service/cardapioService';
 import { useCarrinho } from '../contexts/carrinho/CarrinhoContext';
+import { FiStar } from 'react-icons/fi';
 import { 
-  FiCoffee, FiHome, FiStar 
-} from 'react-icons/fi';
-import { 
-  IoRestaurant, IoFastFood, IoFish, IoWine, IoIceCream, IoClose 
+  IoRestaurant, IoWine, IoIceCream, IoClose 
 } from 'react-icons/io5';
 import { 
-  MdRestaurant, MdRestaurantMenu, MdLocalPizza, MdAdd 
+  MdRestaurantMenu, MdAdd 
 } from 'react-icons/md';
-import { FaUtensils, FaCookieBite } from 'react-icons/fa';
+import { FaUtensils } from 'react-icons/fa';
 
 const CardapioPublico = () => {
   const [itens, setItens] = useState([]);
@@ -23,6 +21,7 @@ const CardapioPublico = () => {
 
   const { adicionarItem } = useCarrinho();
 
+  // Categorias para os botões
   const categorias = [
     { id: 'todos', nome: 'Todos', icon: <MdRestaurantMenu /> },
     { id: 'entradas', nome: 'Entradas', icon: <FaUtensils /> },
@@ -30,6 +29,30 @@ const CardapioPublico = () => {
     { id: 'bebidas', nome: 'Bebidas', icon: <IoWine /> },
     { id: 'sobremesas', nome: 'Sobremesas', icon: <IoIceCream /> },
   ];
+
+  // Configuração das seções (para quando mostrar "Todos")
+  const categoriasConfig = {
+    entradas: { 
+      nome: 'Entradas', 
+      icon: <FaUtensils className="text-xl text-primary" />,
+      borderColor: 'border-primary'
+    },
+    principais: { 
+      nome: 'Pratos Principais', 
+      icon: <IoRestaurant className="text-xl text-primary" />,
+      borderColor: 'border-primary'
+    },
+    bebidas: { 
+      nome: 'Bebidas', 
+      icon: <IoWine className="text-xl text-yellow-500" />,
+      borderColor: 'border-yellow-500'
+    },
+    sobremesas: { 
+      nome: 'Sobremesas', 
+      icon: <IoIceCream className="text-xl text-pink-500" />,
+      borderColor: 'border-pink-500'
+    }
+  };
 
   useEffect(() => {
     carregarCardapio();
@@ -48,9 +71,22 @@ const CardapioPublico = () => {
     }
   };
 
-  const itensFiltrados = categoriaAtiva === 'todos'
-    ? itens
-    : itens.filter(item => item.categoria === categoriaAtiva);
+  // Agrupar itens por categoria
+  const itensPorCategoria = {};
+  if (categoriaAtiva === 'todos') {
+    itens.forEach(item => {
+      const cat = item.categoria;
+      if (!itensPorCategoria[cat]) {
+        itensPorCategoria[cat] = [];
+      }
+      itensPorCategoria[cat].push(item);
+    });
+  }
+
+  // Itens filtrados (quando não está em "todos")
+  const itensFiltrados = categoriaAtiva !== 'todos'
+    ? itens.filter(item => item.categoria === categoriaAtiva)
+    : [];
 
   const abrirModal = (item) => {
     setItemSelecionado(item);
@@ -85,88 +121,182 @@ const CardapioPublico = () => {
   }
 
   return (
-    <div className="min-h-screen bg-light-bg p-2">
-      <div className="container mx-auto px-1">
-        <h1 className="text-4xl font-bold text-center text-dark-bg mb-12">
-          Nosso Cardápio Completo
+    <div className="min-h-screen bg-light-bg py-8 md:py-16">
+      <div className="container mx-auto px-4 md:px-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-center text-dark-bg mb-4">
+          Nosso Cardápio
         </h1>
+        <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+          Sabores únicos preparados com muito carinho para você
+        </p>
 
-        {/* Categorias */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        {/* BOTÕES DE FILTRO (MANTIDOS) */}
+        <div className="flex flex-wrap justify-center gap-3 mb-10">
           {categorias.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setCategoriaAtiva(cat.id)}
-              className={`px-6 py-3 rounded-full transition-all duration-300 flex items-center gap-2 ${
+              className={`px-5 py-2 rounded-full transition-all duration-300 flex items-center gap-2 text-sm md:text-base ${
                 categoriaAtiva === cat.id
-                  ? 'bg-primary text-dark-bg font-bold shadow-lg scale-105'
+                  ? 'bg-primary text-dark-bg font-bold shadow-md scale-105'
                   : 'bg-white text-gray-600 hover:bg-primary/20'
               }`}
             >
-              <span className="text-lg">{cat.icon}</span>
-              {cat.nome}
+              <span className="text-base md:text-lg">{cat.icon}</span>
+              <span className="hidden sm:inline">{cat.nome}</span>
+              <span className="sm:hidden">{cat.nome.substring(0, 3)}</span>
             </button>
           ))}
         </div>
 
-        {/* Grid de itens */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {itensFiltrados.map((item) => (
-            <div
-              key={item._id}
-              className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-            >
-              <div className="h-48 overflow-hidden">
-                {item.imagem ? (
-                  <img
-                    src={item.imagem}
-                    alt={item.nome}
-                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                    <IoRestaurant className="text-6xl text-primary/50" />
+        {/* MODO: TODAS AS CATEGORIAS (com seções) */}
+        {categoriaAtiva === 'todos' && (
+          <div className="space-y-12 md:space-y-16">
+            {Object.entries(itensPorCategoria).map(([categoria, itensDaCat]) => {
+              const config = categoriasConfig[categoria] || {
+                nome: categoria.charAt(0).toUpperCase() + categoria.slice(1),
+                icon: <MdRestaurantMenu className="text-xl text-primary" />,
+                borderColor: 'border-primary'
+              };
+              
+              return (
+                <div key={categoria}>
+                  {/* CABEÇALHO DA SEÇÃO */}
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex items-center gap-2">
+                      {config.icon}
+                      <h2 className="text-lg md:text-xl font-bold text-dark-bg">
+                        {config.nome}
+                      </h2>
+                    </div>
+                    <div className={`flex-1 h-px bg-gradient-to-r ${config.borderColor} from-${config.borderColor.split('-')[1]} to-transparent`}></div>
                   </div>
-                )}
-              </div>
 
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-bold text-dark-bg">
-                    {item.nome}
-                  </h3>
+                  {/* GRID DE ITENS DA CATEGORIA */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                    {itensDaCat.map((item) => (
+                      <div
+                        key={item._id}
+                        className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                      >
+                        {/* Imagem */}
+                        <div className="h-44 md:h-48 overflow-hidden relative">
+                          {item.imagem ? (
+                            <img
+                              src={item.imagem}
+                              alt={item.nome}
+                              className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                              <IoRestaurant className="text-5xl md:text-6xl text-primary/50" />
+                            </div>
+                          )}
+                          
+                          {/* Badge de destaque */}
+                          {item.destaque && (
+                            <div className="absolute top-3 right-3 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
+                              <FiStar className="text-xs" />
+                              Destaque
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Conteúdo */}
+                        <div className="p-4">
+                          <h3 className="text-base md:text-lg font-bold text-dark-bg mb-2">
+                            {item.nome}
+                          </h3>
+                          
+                          <p className="text-gray-600 text-xs md:text-sm mb-4 line-clamp-2">
+                            {item.descricao}
+                          </p>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-lg md:text-xl font-bold text-primary">
+                              {formatarPreco(item.preco)}
+                            </span>
+                            <button
+                              onClick={() => abrirModal(item)}
+                              className="bg-primary text-dark-bg px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-secondary transition-colors flex items-center gap-1 text-sm md:text-base"
+                            >
+                              <MdAdd className="text-base md:text-lg" />
+                              Adicionar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* MODO: CATEGORIA ESPECÍFICA (grid normal) */}
+        {categoriaAtiva !== 'todos' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            {itensFiltrados.map((item) => (
+              <div
+                key={item._id}
+                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              >
+                {/* Imagem */}
+                <div className="h-44 md:h-48 overflow-hidden relative">
+                  {item.imagem ? (
+                    <img
+                      src={item.imagem}
+                      alt={item.nome}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <IoRestaurant className="text-5xl md:text-6xl text-primary/50" />
+                    </div>
+                  )}
+                  
+                  {/* Badge de destaque */}
                   {item.destaque && (
-                    <span className="bg-primary text-dark-bg text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    <div className="absolute top-3 right-3 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
                       <FiStar className="text-xs" />
                       Destaque
-                    </span>
+                    </div>
                   )}
                 </div>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {item.descricao}
-                </p>
+                {/* Conteúdo */}
+                <div className="p-4">
+                  <h3 className="text-base md:text-lg font-bold text-dark-bg mb-2">
+                    {item.nome}
+                  </h3>
+                  
+                  <p className="text-gray-600 text-xs md:text-sm mb-4 line-clamp-2">
+                    {item.descricao}
+                  </p>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-primary">
-                    {formatarPreco(item.preco)}
-                  </span>
-                  <button
-                    onClick={() => abrirModal(item)}
-                    className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors flex items-center gap-2"
-                  >
-                    <MdAdd className="text-lg" />
-                    Adicionar
-                  </button>
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg md:text-xl font-bold text-primary">
+                      {formatarPreco(item.preco)}
+                    </span>
+                    <button
+                      onClick={() => abrirModal(item)}
+                      className="bg-primary text-dark-bg px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-secondary transition-colors flex items-center gap-1 text-sm md:text-base"
+                    >
+                      <MdAdd className="text-base md:text-lg" />
+                      Adicionar
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {itensFiltrados.length === 0 && (
+        {/* Mensagem quando não tem itens */}
+        {categoriaAtiva !== 'todos' && itensFiltrados.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-xl">
+            <p className="text-gray-500 text-lg">
               Nenhum item encontrado nesta categoria
             </p>
           </div>
