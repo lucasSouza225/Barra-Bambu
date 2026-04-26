@@ -1,16 +1,16 @@
 import { FiPercent } from 'react-icons/fi';
 
-import promo1 from '../../assets/promo-1.jpg';
-import promo2 from '../../assets/promo-2.jpg';
-import promo3 from '../../assets/promo-3.jpg';
-import promo4 from '../../assets/promo-4.jpg';
+import servico1 from '../../assets/promo-1.jpg';
+import servico2 from '../../assets/promo-2.jpg';
+import servico3 from '../../assets/promo-3.jpg';
+import servico4 from '../../assets/promo-4.jpg';
 
 const Servicos = () => {
-  const promocoes = [
-    { id: 1, imagem: promo1 },
-    { id: 2, imagem: promo2 },
-    { id: 3, imagem: promo3 },
-    { id: 4, imagem: promo4 }
+  const servicos = [
+    { id: 1, imagem: servico1 },
+    { id: 2, imagem: servico2 },
+    { id: 3, imagem: servico3 },
+    { id: 4, imagem: servico4 }
   ];
 
   return (
@@ -27,13 +27,13 @@ const Servicos = () => {
         {/* Mobile: Scroll */}
         <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
           <div className="flex gap-4">
-            {promocoes.map((promo) => (
+            {servicos.map((servico) => (
               <div
-                key={promo.id}
-                className="flex-shrink-0 w-48 h-48 rounded-lg overflow-hidden shadow-md"
+                key={servico.id}
+                className="shrink-0 w-48 h-48 rounded-lg overflow-hidden shadow-md"
               >
                 <img
-                  src={promo.imagem}
+                  src={servico.imagem}
                   alt="Serviço"
                   className="w-full h-full object-cover"
                 />
@@ -44,13 +44,13 @@ const Servicos = () => {
 
         {/* Desktop: Grid */}
         <div className="hidden lg:grid lg:grid-cols-4 gap-6">
-          {promocoes.map((promo) => (
+          {servicos.map((servico) => (
             <div
-              key={promo.id}
+              key={servico.id}
               className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
             >
               <img
-                src={promo.imagem}
+                src={servico.imagem}
                 alt="Serviço"
                 className="w-full h-full object-cover"
               />

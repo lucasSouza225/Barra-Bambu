@@ -13,7 +13,7 @@ const Sobre = () => {
               <img 
                 src={welcomeImg} 
                 alt="Bem-vindo ao Barra Bambu" 
-                className="w-full h-auto rounded-lg shadow-xl"
+                className="w-full h-auto rounded-lg "
               />
               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/20 rounded-full -z-10"></div>
             </div>

@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { carrosselService } from '../../service/carrosselService';
-import { FiImage } from 'react-icons/fi';
+import { useState, useEffect, useCallback } from "react";
+import { carrosselService } from "../../service/carrosselService";
+import { FiImage } from "react-icons/fi";
 
 const Carrossel = () => {
   const [slides, setSlides] = useState([]);
@@ -15,18 +15,18 @@ const Carrossel = () => {
   const carregarBanners = async () => {
     try {
       const data = await carrosselService.listarAtivos();
-      
-      const slidesFormatados = data.map(banner => ({
+
+      const slidesFormatados = data.map((banner) => ({
         id: banner._id,
         image: banner.imagem,
         title: banner.titulo,
-        description: banner.descricao || 'Conheça o Barra Bambu'
+        description: banner.descricao || "Conheça o Barra Bambu",
       }));
 
       setSlides(slidesFormatados);
       setCurrentIndex(0);
     } catch (error) {
-      console.error('Erro ao carregar banners:', error);
+      console.error("Erro ao carregar banners:", error);
     } finally {
       setLoading(false);
     }
@@ -42,12 +42,15 @@ const Carrossel = () => {
   const prevSlide = () => {
     if (isTransitioning || slides.length === 0) return;
     setIsTransitioning(true);
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + slides.length) % slides.length,
+    );
     setTimeout(() => setIsTransitioning(false), 500);
   };
 
   const goToSlide = (index) => {
-    if (isTransitioning || index === currentIndex || slides.length === 0) return;
+    if (isTransitioning || index === currentIndex || slides.length === 0)
+      return;
     setIsTransitioning(true);
     setCurrentIndex(index);
     setTimeout(() => setIsTransitioning(false), 500);
@@ -55,10 +58,10 @@ const Carrossel = () => {
 
   useEffect(() => {
     if (slides.length === 0) return;
-    
+
     const timer = setInterval(() => {
       nextSlide();
-    }, 2000);
+    }, 3000);
 
     return () => clearInterval(timer);
   }, [nextSlide, slides.length]);
@@ -88,10 +91,10 @@ const Carrossel = () => {
         {slides.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out
-              ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+            className={`absolute inset-0 w-full h-full transition-opacity duration-2000 ease-in-out
+              ${index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"}`}
           >
-            <div 
+            <div
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${slide.image})` }}
             >
@@ -99,10 +102,10 @@ const Carrossel = () => {
             </div>
 
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 animate-fade-in-up">
                 {slide.title}
               </h2>
-              <p className="text-lg md:text-xl lg:text-2xl max-w-2xl">
+              <p className="text-base md:text-lg lg:text-xl max-w-2xl text-white/60 animate-fade-in-up animation-delay-200">
                 {slide.description}
               </p>
             </div>
@@ -117,13 +120,18 @@ const Carrossel = () => {
             className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 text-white w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 group"
             aria-label="Slide anterior"
           >
-            <svg 
-              className="w-6 h-6 group-hover:-translate-x-1 transition-transform duration-300" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-6 h-6 group-hover:-translate-x-1 transition-transform duration-300"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
 
@@ -132,13 +140,18 @@ const Carrossel = () => {
             className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 text-white w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 group"
             aria-label="Próximo slide"
           >
-            <svg 
-              className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </>
@@ -151,9 +164,11 @@ const Carrossel = () => {
               key={index}
               onClick={() => goToSlide(index)}
               className={`transition-all duration-500 rounded-full
-                ${index === currentIndex 
-                  ? 'w-10 h-3 bg-primary' 
-                  : 'w-3 h-3 bg-white/50 hover:bg-white/80'}`}
+                ${
+                  index === currentIndex
+                    ? "w-10 h-3 bg-primary"
+                    : "w-3 h-3 bg-white/50 hover:bg-white/80"
+                }`}
               aria-label={`Ir para slide ${index + 1}`}
             />
           ))}
