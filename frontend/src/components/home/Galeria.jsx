@@ -1,34 +1,45 @@
 import { useState, useEffect } from 'react';
 import { galeriaService } from '../../service/galeriaService';
-import { FiImage, FiX, FiChevronLeft, FiChevronRight, FiStar } from 'react-icons/fi';
+import { 
+  FiImage, 
+  FiX, 
+  FiChevronLeft, 
+  FiChevronRight, 
+  FiStar,
+  FiGrid,
+  FiHome,
+  FiCalendar,
+  FiCoffee,
+  FiCamera
+} from 'react-icons/fi';
 import { IoImages } from 'react-icons/io5';
+import { MdPhotoLibrary, MdRestaurant, MdEvent } from 'react-icons/md';
+import { HiOutlinePhotograph } from 'react-icons/hi';
 
 const Galeria = () => {
   const [imagens, setImagens] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [categoriaAtiva, setCategoriaAtiva] = useState('todas'); // ← VOLTOU
+  const [categoriaAtiva, setCategoriaAtiva] = useState('todas');
   const [modalAberto, setModalAberto] = useState(false);
   const [imagemSelecionada, setImagemSelecionada] = useState(null);
   const [indiceAtual, setIndiceAtual] = useState(0);
   
-  // Estados para paginação
   const [limite, setLimite] = useState(8);
   const [carregandoMais, setCarregandoMais] = useState(false);
 
-  // Categorias (VOLTOU)
+  // Categorias com React Icons
   const categorias = [
-    { id: 'todas', nome: 'Todas', icon: '🖼️' },
-    { id: 'ambiente', nome: 'Ambiente', icon: '🏠' },
-    { id: 'eventos', nome: 'Eventos', icon: '🎉' },
-    { id: 'pratos', nome: 'Pratos', icon: '🍽️' },
-    { id: 'outros', nome: 'Outros', icon: '📸' }
+    { id: 'todas', nome: 'Todas', icon: <FiGrid className="text-base" /> },
+    { id: 'ambiente', nome: 'Ambiente', icon: <FiHome className="text-base" /> },
+    { id: 'eventos', nome: 'Eventos', icon: <FiCalendar className="text-base" /> },
+    { id: 'pratos', nome: 'Pratos', icon: <FiCoffee className="text-base" /> },
+    { id: 'outros', nome: 'Outros', icon: <FiCamera className="text-base" /> }
   ];
 
   useEffect(() => {
     carregarImagens();
   }, []);
 
-  // Resetar limite quando mudar de categoria
   useEffect(() => {
     setLimite(8);
   }, [categoriaAtiva]);
@@ -45,12 +56,10 @@ const Galeria = () => {
     }
   };
 
-  // Filtrar imagens por categoria (VOLTOU)
   const imagensFiltradas = categoriaAtiva === 'todas'
     ? imagens
     : imagens.filter(img => img.categoria === categoriaAtiva);
 
-  // Aplicar limite nas imagens filtradas
   const imagensParaMostrar = imagensFiltradas.slice(0, limite);
   const temMaisImagens = limite < imagensFiltradas.length;
 
@@ -96,6 +105,17 @@ const Galeria = () => {
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
+  // Função para pegar ícone da categoria
+  const getIconeCategoria = (categoria) => {
+    const icons = {
+      ambiente: <FiHome className="text-xs" />,
+      eventos: <FiCalendar className="text-xs" />,
+      pratos: <FiCoffee className="text-xs" />,
+      outros: <FiCamera className="text-xs" />
+    };
+    return icons[categoria] || <MdPhotoLibrary className="text-xs" />;
+  };
+
   if (loading) {
     return (
       <section id='galeria' className="py-12 md:py-16 bg-light-bg">
@@ -120,7 +140,7 @@ const Galeria = () => {
             Nossa Galeria
           </h2>
           <div className="text-center py-12">
-            <FiImage className="text-5xl md:text-6xl text-gray-300 mx-auto mb-4" />
+            <MdPhotoLibrary className="text-5xl md:text-6xl text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg md:text-xl">Em breve novas fotos!</p>
           </div>
         </div>
@@ -135,16 +155,16 @@ const Galeria = () => {
           {/* Título responsivo */}
           <div className="text-center mb-8 md:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-bg flex items-center justify-center gap-2 flex-wrap">
-                        <FiStar className="text-yellow-500 text-xl sm:text-2xl md:text-3xl" />
-                        Nossa Galeria
-                        <FiStar className="text-yellow-500 text-xl sm:text-2xl md:text-3xl" />
-                      </h2>
+              <FiStar className="text-yellow-500 text-xl sm:text-2xl md:text-3xl" />
+              Nossa Galeria
+              <FiStar className="text-yellow-500 text-xl sm:text-2xl md:text-3xl" />
+            </h2>
             <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
               Momentos especiais do nosso espaço
             </p>
           </div>
 
-          {/* FILTROS POR CATEGORIA - VOLTOU! */}
+          {/* FILTROS POR CATEGORIA COM REACT ICONS */}
           <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-12">
             {categorias.map((cat) => (
               <button
@@ -156,7 +176,7 @@ const Galeria = () => {
                     : 'bg-white text-gray-600 hover:bg-primary/20'
                 }`}
               >
-                <span>{cat.icon}</span>
+                <span className="text-sm md:text-base">{cat.icon}</span>
                 <span className="hidden sm:inline">{cat.nome}</span>
                 <span className="sm:hidden">{cat.nome.substring(0, 3)}</span>
               </button>
@@ -176,26 +196,23 @@ const Galeria = () => {
                     src={imagem.imagem}
                     alt={imagem.titulo}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML = '<div class="w-full h-full bg-gray-200 flex items-center justify-center"><FiImage class="text-3xl text-gray-400" /></div>';
-                    }}
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <FiImage className="text-3xl text-gray-400" />
+                    <MdPhotoLibrary className="text-3xl text-gray-400" />
                   </div>
                 )}
 
-                {/* Badge de categoria (opcional) */}
-                <div className="absolute top-2 left-2 bg-dark-bg/70 text-white text-[10px] md:text-xs px-2 py-1 rounded-full">
-                  {categorias.find(c => c.id === imagem.categoria)?.icon} {imagem.categoria}
+                {/* Badge de categoria com React Icon */}
+                <div className="absolute top-2 left-2 bg-dark-bg/70 text-white text-[10px] md:text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {getIconeCategoria(imagem.categoria)}
+                  <span>{imagem.categoria}</span>
                 </div>
 
                 {/* Overlay no hover */}
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
-                  <span className="text-white text-xs md:text-sm font-medium truncate">
+                  <span className="text-white text-xs md:text-sm font-medium truncate flex items-center gap-1">
+                    <FiImage className="text-white text-xs" />
                     {imagem.titulo}
                   </span>
                 </div>
@@ -218,8 +235,8 @@ const Galeria = () => {
                   </>
                 ) : (
                   <>
-                    <span>📸</span>
-                    Ver Mais Fotos ({imagensFiltradas.length - limite} restantes)
+                    <MdPhotoLibrary className="text-lg" />
+                    Ver Mais Fotos
                   </>
                 )}
               </button>
@@ -231,7 +248,6 @@ const Galeria = () => {
       {/* Modal de visualização */}
       {modalAberto && imagemSelecionada && (
         <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
-          {/* Botão fechar */}
           <button
             onClick={fecharModal}
             className="absolute top-4 right-4 text-white hover:text-primary transition-colors z-10"
@@ -239,7 +255,6 @@ const Galeria = () => {
             <FiX size={28} className="md:w-8 md:h-8" />
           </button>
 
-          {/* Navegação */}
           {imagensFiltradas.length > 1 && (
             <>
               <button
@@ -257,7 +272,6 @@ const Galeria = () => {
             </>
           )}
 
-          {/* Imagem */}
           <div className="max-w-6xl w-full max-h-[90vh] flex flex-col items-center">
             <img
               src={imagemSelecionada.imagem}
@@ -265,16 +279,17 @@ const Galeria = () => {
               className="max-w-full max-h-[70vh] md:max-h-[80vh] object-contain rounded-lg"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/800x600/38241B/FFD301?text=Erro+ao+carregar';
+                e.target.src = '';
               }}
             />
 
-            {/* Título da imagem no modal */}
-            <h3 className="text-white text-base md:text-2xl font-bold text-center mt-4">
+            <h3 className="text-white text-base md:text-2xl font-bold text-center mt-4 flex items-center gap-2">
+              {getIconeCategoria(imagemSelecionada.categoria)}
               {imagemSelecionada.titulo}
             </h3>
-            <p className="text-gray-400 text-xs md:text-sm mt-2">
-              {categorias.find(c => c.id === imagemSelecionada.categoria)?.icon} {imagemSelecionada.categoria} • {indiceAtual + 1} / {imagensFiltradas.length}
+            <p className="text-gray-400 text-xs md:text-sm mt-2 flex items-center gap-1">
+              <MdPhotoLibrary className="text-xs" />
+              {imagemSelecionada.categoria} • {indiceAtual + 1} / {imagensFiltradas.length}
             </p>
           </div>
         </div>
