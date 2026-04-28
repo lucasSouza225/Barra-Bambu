@@ -20,7 +20,7 @@ import { useEffect } from "react"
 axios.defaults.baseURL = import.meta.env.VITE_AXIOS_BASE_URL
 axios.defaults.withCredentials = true
 
-console.log(import.meta.env)
+/* console.log(import.meta.env) */
 
 function App() {
   const [user, setUser] = useState(null)

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useCarrinho } from "../../contexts/carrinho/CarrinhoContext";
-import { FiShoppingCart } from "react-icons/fi";
+import { FiShoppingCart, FiCheckCircle, FiX, FiAlertCircle } from "react-icons/fi";
 import { IoRestaurant, IoClose } from "react-icons/io5";
 import { FaWhatsapp } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
+import { GiConfirmed } from "react-icons/gi";
 import FormularioEntrega from "./FormularioEntrega";
 
 const CarrinhoLateral = () => {
   const [aberto, setAberto] = useState(false);
   const [mostrarFormEntrega, setMostrarFormEntrega] = useState(false);
+  const [mensagemToast, setMensagemToast] = useState(null);
   const {
     itensCarrinho,
     observacoes,
@@ -31,7 +33,13 @@ const CarrinhoLateral = () => {
     });
   };
 
-  // FUNÇÃO PARA FORMATAR FORMA DE PAGAMENTO
+  const mostrarToast = (tipo, titulo, mensagem) => {
+    setMensagemToast({ tipo, titulo, mensagem });
+    setTimeout(() => {
+      setMensagemToast(null);
+    }, 4000);
+  };
+
   const formatarPagamento = (forma) => {
     switch (forma) {
       case "dinheiro":
@@ -72,7 +80,6 @@ const CarrinhoLateral = () => {
     message += "💳 *FORMA DE PAGAMENTO*\n";
     message += `${formatarPagamento(dadosEntrega.formaPagamento)}\n`;
     
-    // Se for dinheiro e tiver troco
     if (dadosEntrega.formaPagamento === "dinheiro" && dadosEntrega.troco) {
       const trocoNum = parseFloat(dadosEntrega.troco);
       if (trocoNum > 0) {
@@ -92,8 +99,29 @@ const CarrinhoLateral = () => {
     setMostrarFormEntrega(false);
     setAberto(false);
 
-    alert("✅ Pedido enviado com sucesso!");
+    mostrarToast(
+      "success",
+      "✅ Pedido enviado!",
+      "Seu pedido foi enviado para nosso WhatsApp. Em breve entraremos em contato para confirmar."
+    );
   };
+
+  const coresToast = {
+    success: {
+      bg: "bg-gradient-to-r from-green-500 to-green-600",
+      icon: <FiCheckCircle className="text-white text-xl" />
+    },
+    error: {
+      bg: "bg-gradient-to-r from-red-500 to-red-600",
+      icon: <FiAlertCircle className="text-white text-xl" />
+    },
+    info: {
+      bg: "bg-gradient-to-r from-blue-500 to-blue-600",
+      icon: <GiConfirmed className="text-white text-xl" />
+    }
+  };
+
+  const toastCor = mensagemToast ? coresToast[mensagemToast.tipo] || coresToast.success : coresToast.success;
 
   return (
     <>
@@ -240,6 +268,33 @@ const CarrinhoLateral = () => {
         onSubmit={handleFinalizarPedido}
         totalPedido={totalCarrinho}
       />
+
+      {/* TOAST DE CONFIRMAÇÃO COM REACT ICONS */}
+      {mensagemToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-slide-in-right">
+          <div className={`${toastCor.bg} text-white rounded-xl shadow-2xl max-w-sm overflow-hidden ring-1 ring-white/20`}>
+            <div className="flex items-start p-4">
+              <div className="shrink-0 bg-white/20 rounded-full p-1">
+                {toastCor.icon}
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-bold">
+                  {mensagemToast.titulo}
+                </p>
+                <p className="text-xs mt-1 opacity-95 leading-relaxed">
+                  {mensagemToast.mensagem}
+                </p>
+              </div>
+              <button
+                onClick={() => setMensagemToast(null)}
+                className="ml-4 shrink-0 text-white/80 hover:text-white transition-colors bg-white/10 rounded-full p-1 hover:bg-white/20"
+              >
+                <FiX className="text-sm" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
