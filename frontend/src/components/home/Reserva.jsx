@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FiCheckCircle, FiX } from 'react-icons/fi';
 import reservationImg from '../../assets/reservation.jpg';
 
 const Reserva = () => {
@@ -12,8 +13,17 @@ const Reserva = () => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mensagemToast, setMensagemToast] = useState(null); // NOVO
 
   const whatsappNumber = '5511936340295'; 
+
+  // NOVA: Função para mostrar toast
+  const mostrarToast = (tipo, titulo, mensagem) => {
+    setMensagemToast({ tipo, titulo, mensagem });
+    setTimeout(() => {
+      setMensagemToast(null);
+    }, 5000);
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -75,13 +85,28 @@ const Reserva = () => {
     
     setIsSubmitting(false);
     
-    alert('Redirecionando para WhatsApp...');
+    // NOVO: Toast em vez de alert
+    mostrarToast(
+      "success",
+      "✅ Reserva enviada!",
+      "Sua solicitação de reserva foi enviada para nosso WhatsApp. Em breve entraremos em contato para confirmar."
+    );
   };
 
   const today = new Date().toISOString().split('T')[0];
 
+  // Cores do toast
+  const coresToast = {
+    success: {
+      bg: "bg-gradient-to-r from-green-500 to-green-600",
+      icon: <FiCheckCircle className="text-white text-xl" />
+    }
+  };
+
+  const toastCor = mensagemToast ? coresToast[mensagemToast.tipo] : coresToast.success;
+
   return (
-    <section id="reserva" className="p-5 bg-light-bg">
+    <section id="reserva" className="p-5 bg-light-bg relative">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-12.5 items-center">
           
@@ -238,6 +263,35 @@ const Reserva = () => {
           </div>
         </div>
       </div>
+
+      {/* TOAST DE CONFIRMAÇÃO */}
+      {mensagemToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-slide-in-right">
+          <div className={`${toastCor.bg} text-white rounded-xl shadow-2xl max-w-sm overflow-hidden ring-1 ring-white/20`}>
+            <div className="flex items-start p-4">
+              <div className="shrink-0 bg-white/20 rounded-full p-1">
+                {toastCor.icon}
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-bold">
+                  {mensagemToast.titulo}
+                </p>
+                <p className="text-xs mt-1 opacity-95 leading-relaxed">
+                  {mensagemToast.mensagem}
+                </p>
+              </div>
+              <button
+                onClick={() => setMensagemToast(null)}
+                className="ml-4 shrink-0 text-white/80 hover:text-white transition-colors bg-white/10 rounded-full p-1 hover:bg-white/20"
+              >
+                <FiX className="text-sm" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+     
     </section>
   );
 };
