@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { cardapioService } from '../service/cardapioService';
 import { useCarrinho } from '../contexts/carrinho/CarrinhoContext';
-import { FiStar } from 'react-icons/fi';
+import { FiStar, FiCheck } from 'react-icons/fi';
 import { 
   IoRestaurant, IoWine, IoIceCream, IoClose 
 } from 'react-icons/io5';
@@ -18,6 +18,9 @@ const CardapioPublico = () => {
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [quantidade, setQuantidade] = useState(1);
   const [observacao, setObservacao] = useState('');
+  
+  // NOVO: Estado para mensagem de confirmação
+  const [mensagemConfirmacao, setMensagemConfirmacao] = useState(null);
 
   const { adicionarItem } = useCarrinho();
 
@@ -30,7 +33,7 @@ const CardapioPublico = () => {
     { id: 'sobremesas', nome: 'Sobremesas', icon: <IoIceCream /> },
   ];
 
-  // Configuração das seções (para quando mostrar "Todos")
+  // Configuração das seções
   const categoriasConfig = {
     entradas: { 
       nome: 'Entradas', 
@@ -52,6 +55,14 @@ const CardapioPublico = () => {
       icon: <IoIceCream className="text-xl text-pink-500" />,
       borderColor: 'border-pink-500'
     }
+  };
+
+  // NOVO: Função para mostrar mensagem de confirmação
+  const mostrarConfirmacao = (nomeItem, quantidadeItem) => {
+    setMensagemConfirmacao({ nome: nomeItem, quantidade: quantidadeItem });
+    setTimeout(() => {
+      setMensagemConfirmacao(null);
+    }, 3000); // Mensagem some após 3 segundos
   };
 
   useEffect(() => {
@@ -83,7 +94,7 @@ const CardapioPublico = () => {
     });
   }
 
-  // Itens filtrados (quando não está em "todos")
+  // Itens filtrados
   const itensFiltrados = categoriaAtiva !== 'todos'
     ? itens.filter(item => item.categoria === categoriaAtiva)
     : [];
@@ -101,6 +112,9 @@ const CardapioPublico = () => {
       observacao: observacao
     }, quantidade);
     setModalAberto(false);
+    
+    // NOVO: Mostrar mensagem de confirmação
+    mostrarConfirmacao(itemSelecionado.nome, quantidade);
   };
 
   const formatarPreco = (preco) => {
@@ -121,7 +135,7 @@ const CardapioPublico = () => {
   }
 
   return (
-    <div className="min-h-screen bg-light-bg py-8 md:py-16">
+    <div className="min-h-screen bg-light-bg py-8 md:py-16 relative">
       <div className="container mx-auto px-4 md:px-6">
         <h1 className="text-3xl md:text-4xl font-bold text-center text-dark-bg mb-4">
           Nosso Cardápio
@@ -130,7 +144,7 @@ const CardapioPublico = () => {
           Sabores únicos preparados com muito carinho para você
         </p>
 
-        {/* BOTÕES DE FILTRO (MANTIDOS) */}
+        {/* BOTÕES DE FILTRO */}
         <div className="flex flex-wrap justify-center gap-3 mb-10">
           {categorias.map((cat) => (
             <button
@@ -149,7 +163,7 @@ const CardapioPublico = () => {
           ))}
         </div>
 
-        {/* MODO: TODAS AS CATEGORIAS (com seções) */}
+        {/* MODO: TODAS AS CATEGORIAS */}
         {categoriaAtiva === 'todos' && (
           <div className="space-y-12 md:space-y-16">
             {Object.entries(itensPorCategoria).map(([categoria, itensDaCat]) => {
@@ -161,7 +175,6 @@ const CardapioPublico = () => {
               
               return (
                 <div key={categoria}>
-                  {/* CABEÇALHO DA SEÇÃO */}
                   <div className="flex items-center gap-3 mb-6">
                     <div className="flex items-center gap-2">
                       {config.icon}
@@ -169,17 +182,15 @@ const CardapioPublico = () => {
                         {config.nome}
                       </h2>
                     </div>
-                    <div className={`flex-1 h-px bg-gradient-to-r ${config.borderColor} from-${config.borderColor.split('-')[1]} to-transparent`}></div>
+                    <div className={`flex-1 h-px bg-linear-to-r ${config.borderColor} from-${config.borderColor.split('-')[1]} to-transparent`}></div>
                   </div>
 
-                  {/* GRID DE ITENS DA CATEGORIA */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     {itensDaCat.map((item) => (
                       <div
                         key={item._id}
                         className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                       >
-                        {/* Imagem */}
                         <div className="h-44 md:h-48 overflow-hidden relative">
                           {item.imagem ? (
                             <img
@@ -188,12 +199,11 @@ const CardapioPublico = () => {
                               className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                            <div className="w-full h-full bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
                               <IoRestaurant className="text-5xl md:text-6xl text-primary/50" />
                             </div>
                           )}
                           
-                          {/* Badge de destaque */}
                           {item.destaque && (
                             <div className="absolute top-3 right-3 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
                               <FiStar className="text-xs" />
@@ -202,7 +212,6 @@ const CardapioPublico = () => {
                           )}
                         </div>
 
-                        {/* Conteúdo */}
                         <div className="p-4">
                           <h3 className="text-base md:text-lg font-bold text-dark-bg mb-2">
                             {item.nome}
@@ -234,7 +243,7 @@ const CardapioPublico = () => {
           </div>
         )}
 
-        {/* MODO: CATEGORIA ESPECÍFICA (grid normal) */}
+        {/* MODO: CATEGORIA ESPECÍFICA */}
         {categoriaAtiva !== 'todos' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {itensFiltrados.map((item) => (
@@ -242,7 +251,6 @@ const CardapioPublico = () => {
                 key={item._id}
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
               >
-                {/* Imagem */}
                 <div className="h-44 md:h-48 overflow-hidden relative">
                   {item.imagem ? (
                     <img
@@ -251,12 +259,11 @@ const CardapioPublico = () => {
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                    <div className="w-full h-full bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
                       <IoRestaurant className="text-5xl md:text-6xl text-primary/50" />
                     </div>
                   )}
                   
-                  {/* Badge de destaque */}
                   {item.destaque && (
                     <div className="absolute top-3 right-3 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
                       <FiStar className="text-xs" />
@@ -265,7 +272,6 @@ const CardapioPublico = () => {
                   )}
                 </div>
 
-                {/* Conteúdo */}
                 <div className="p-4">
                   <h3 className="text-base md:text-lg font-bold text-dark-bg mb-2">
                     {item.nome}
@@ -303,7 +309,7 @@ const CardapioPublico = () => {
         )}
       </div>
 
-      {/* Modal de quantidade */}
+      {/* MODAL DE QUANTIDADE */}
       {modalAberto && itemSelecionado && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
@@ -369,6 +375,19 @@ const CardapioPublico = () => {
           </div>
         </div>
       )}
+
+      {/* NOVO: MENSAGEM DE CONFIRMAÇÃO (TOAST) */}
+      {mensagemConfirmacao && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-up">
+          <div className="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3">
+            <FiCheck className="text-xl" />
+            <span>
+              Adicionado ao carrinho!
+            </span>
+          </div>
+        </div>
+      )}
+     
     </div>
   );
 };
