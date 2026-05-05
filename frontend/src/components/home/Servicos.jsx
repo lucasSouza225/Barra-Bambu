@@ -1,9 +1,9 @@
 import { FiPercent } from 'react-icons/fi';
 
-import servico1 from '../../assets/promo-1.jpg';
-import servico2 from '../../assets/promo-2.jpg';
-import servico3 from '../../assets/promo-3.jpg';
-import servico4 from '../../assets/promo-4.jpg';
+import servico1 from '../../assets/servChop.jpg';
+import servico2 from '../../assets/servPromo.jpg';
+import servico3 from '../../assets/servDelivery.jpg';
+import servico4 from '../../assets/servShow.jpg';
 
 const Servicos = () => {
   const servicos = [
