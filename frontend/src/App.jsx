@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"
 import Header from "./components/Header"
 import Home from "./pages/Home"
 import Footer from "./components/Footer"
@@ -20,9 +20,9 @@ import { useEffect } from "react"
 axios.defaults.baseURL = import.meta.env.VITE_AXIOS_BASE_URL
 axios.defaults.withCredentials = true
 
-/* console.log(import.meta.env) */
-
-function App() {
+// Componente que controla a exibição do carrinho
+function AppContent() {
+  const location = useLocation();
   const [user, setUser] = useState(null)
 
   useEffect(() => {
@@ -38,32 +38,41 @@ function App() {
     axiosGet()
   }, [])
 
+  // Verificar se está na área admin
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  return (
+    <CarrinhoProvider>
+      <Header user={user} />
+      {!isAdminRoute && <CarrinhoLateral />}
+      <Routes>
+        {/* Rotas PÚBLICAS */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginAdmin setUser={setUser} />} />
+        <Route path="/cardapio-publico" element={<CardapioPublico />} /> 
+        
+        {/* Rotas ADMIN (protegidas) */}
+        <Route path="/admin" element={
+          <ProtegerRotaAdmin user={user}>
+            <LayoutAdmin user={user} setUser={setUser} />
+          </ProtegerRotaAdmin>
+        }>
+          <Route index element={<DashboardAdmin />} />
+          <Route path="cardapio" element={<CardapioAdmin />} />
+          <Route path="galeria" element={<GaleriaAdmin />} />
+          <Route path="carrossel" element={<CarrosselAdmin />} />
+        </Route>
+      </Routes>
+      <Footer />
+    </CarrinhoProvider>
+  );
+}
+
+function App() {
   return (
     <BrowserRouter>
       <StrictMode>
-        <CarrinhoProvider> 
-          <Header user={user} />
-          <CarrinhoLateral /> 
-          <Routes>
-            {/* Rotas PÚBLICAS */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginAdmin setUser={setUser} />} />
-            <Route path="/cardapio-publico" element={<CardapioPublico />} /> 
-            
-            {/* Rotas ADMIN (protegidas) */}
-            <Route path="/admin" element={
-              <ProtegerRotaAdmin user={user}>
-                <LayoutAdmin user={user} setUser={setUser} />
-              </ProtegerRotaAdmin>
-            }>
-              <Route index element={<DashboardAdmin />} />
-              <Route path="cardapio" element={<CardapioAdmin />} />
-              <Route path="galeria" element={<GaleriaAdmin />} />
-              <Route path="carrossel" element={<CarrosselAdmin />} />
-            </Route>
-          </Routes>
-          <Footer />
-        </CarrinhoProvider>
+        <AppContent />
       </StrictMode>
     </BrowserRouter>
   )
