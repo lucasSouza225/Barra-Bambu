@@ -1,3 +1,4 @@
+// backend/src/domains/cardapio/controller.js
 import Cardapio from "./models.js";
 import fs from 'fs';
 import path from 'path';
@@ -77,10 +78,7 @@ export const getDestaques = async (req, res) => {
         const destaques = await Cardapio.find({ 
             destaque: true, 
             disponivel: true 
-        })
-        .sort('-createdAt')
-        .limit(8);
-        
+        }).sort('-createdAt').limit(8);
         res.json(destaques);
     } catch (error) {
         res.status(500).json({ 
@@ -93,7 +91,16 @@ export const getDestaques = async (req, res) => {
 // POST - Criar novo item (admin)
 export const createItem = async (req, res) => {
     try {
-        const { nome, descricao, preco, categoria, imagem, destaque } = req.body;
+        const { 
+            nome, 
+            descricao, 
+            preco, 
+            categoria, 
+            subcategoria, 
+            imagem, 
+            destaque,
+            tamanhos 
+        } = req.body;
 
         if (!nome || !descricao || !preco || !categoria) {
             return res.status(400).json({ 
@@ -106,9 +113,11 @@ export const createItem = async (req, res) => {
             descricao,
             preco,
             categoria,
+            subcategoria: subcategoria || '',
             imagem: imagem || '',
             destaque: destaque || false,
-            disponivel: true
+            disponivel: true,
+            tamanhos: tamanhos || {}
         });
 
         res.status(201).json(novoItem);
@@ -122,10 +131,20 @@ export const createItem = async (req, res) => {
     }
 };
 
-// PUT - Atualizar item (admin) - CORRIGIDO
+// PUT - Atualizar item (admin)
 export const updateItem = async (req, res) => {
     try {
-        const { nome, descricao, preco, categoria, imagem, disponivel, destaque } = req.body;
+        const { 
+            nome, 
+            descricao, 
+            preco, 
+            categoria, 
+            subcategoria, 
+            imagem, 
+            disponivel, 
+            destaque,
+            tamanhos 
+        } = req.body;
         
         const itemAtual = await Cardapio.findById(req.params.id);
         
@@ -138,15 +157,23 @@ export const updateItem = async (req, res) => {
             const filename = getFilenameFromUrl(itemAtual.imagem);
             if (filename) {
                 deletarArquivo(filename);
-                console.log('Imagem antiga deletada ao atualizar');
             }
         }
 
-        // CORREÇÃO: { returnDocument: 'after' } em vez de { new: true }
         const itemAtualizado = await Cardapio.findByIdAndUpdate(
             req.params.id,
-            { nome, descricao, preco, categoria, imagem, disponivel, destaque },
-            { returnDocument: 'after', runValidators: true }
+            { 
+                nome, 
+                descricao, 
+                preco, 
+                categoria, 
+                subcategoria, 
+                imagem, 
+                disponivel, 
+                destaque,
+                tamanhos
+            },
+            { new: true, runValidators: true }
         );
 
         res.json(itemAtualizado);
@@ -169,6 +196,7 @@ export const deleteItem = async (req, res) => {
             return res.status(404).json({ message: "Item não encontrado" });
         }
 
+        // Deletar imagem física se existir
         const filename = getFilenameFromUrl(itemRemovido.imagem);
         let imagemDeletada = false;
         

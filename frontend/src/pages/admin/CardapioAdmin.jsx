@@ -1,23 +1,8 @@
 import { useState, useEffect } from 'react';
 import { cardapioService } from '../../service/cardapioService';
-import { 
-  FiSearch, 
-  FiX, 
-  FiStar, 
-  FiEdit, 
-  FiTrash2, 
-  FiPlus,
-  FiImage 
-} from 'react-icons/fi';
-import { 
-  IoRestaurant, 
-  IoClose,
-  IoSave 
-} from 'react-icons/io5';
-import { 
-  MdVisibility, 
-  MdVisibilityOff 
-} from 'react-icons/md';
+import { FiSearch, FiX, FiStar, FiEdit, FiTrash2, FiPlus, FiImage } from 'react-icons/fi';
+import { IoRestaurant, IoClose, IoSave } from 'react-icons/io5';
+import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 
 const CardapioAdmin = () => {
   const [itens, setItens] = useState([]);
@@ -40,7 +25,9 @@ const CardapioAdmin = () => {
     subcategoria: '',
     destaque: false,
     disponivel: true,
-    imagem: ''
+    imagem: '',
+    precoBrotinho: '',  // NOVO
+    precoGrande: ''      // NOVO
   });
 
   useEffect(() => {
@@ -84,10 +71,17 @@ const CardapioAdmin = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    
+    // Para campos de preço, formata como número decimal
+    if (name === 'precoBrotinho' || name === 'precoGrande') {
+      const numValue = value === '' ? '' : parseFloat(value);
+      setFormData(prev => ({ ...prev, [name]: numValue }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -114,9 +108,27 @@ const CardapioAdmin = () => {
         imagemUrl = uploadResult.url;
       }
       
+      // Construir objeto tamanhos para pizza
+      const tamanhos = {};
+      if (formData.categoria === 'pizzas') {
+        if (formData.precoBrotinho && formData.precoBrotinho > 0) {
+          tamanhos.brotinho = { preco: formData.precoBrotinho, disponivel: true };
+        }
+        if (formData.precoGrande && formData.precoGrande > 0) {
+          tamanhos.grande = { preco: formData.precoGrande, disponivel: true };
+        }
+      }
+      
       const itemData = {
-        ...formData,
-        imagem: imagemUrl
+        nome: formData.nome,
+        descricao: formData.descricao,
+        preco: formData.preco,
+        categoria: formData.categoria,
+        subcategoria: formData.subcategoria,
+        destaque: formData.destaque,
+        disponivel: formData.disponivel,
+        imagem: imagemUrl,
+        tamanhos: tamanhos
       };
       
       if (editandoId) {
@@ -126,21 +138,7 @@ const CardapioAdmin = () => {
       }
       
       await carregarItens();
-      setFormData({
-        nome: '',
-        descricao: '',
-        preco: '',
-        categoria: 'principais',
-        subcategoria: '',
-        destaque: false,
-        disponivel: true,
-        imagem: ''
-      });
-      setImagemFile(null);
-      setPreviewUrl('');
-      setEditandoId(null);
-      setMostrarForm(false);
-      setTermoBusca(''); 
+      resetForm();
       
     } catch (error) {
       setError('Erro ao salvar item');
@@ -148,6 +146,25 @@ const CardapioAdmin = () => {
     } finally {
       setUploading(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      nome: '',
+      descricao: '',
+      preco: '',
+      categoria: 'principais',
+      subcategoria: '',
+      destaque: false,
+      disponivel: true,
+      imagem: '',
+      precoBrotinho: '',
+      precoGrande: ''
+    });
+    setImagemFile(null);
+    setPreviewUrl('');
+    setEditandoId(null);
+    setMostrarForm(false);
   };
 
   const handleEdit = (item) => {
@@ -159,16 +176,14 @@ const CardapioAdmin = () => {
       subcategoria: item.subcategoria || '',
       destaque: item.destaque || false,
       disponivel: item.disponivel !== false,
-      imagem: item.imagem || ''
+      imagem: item.imagem || '',
+      precoBrotinho: item.tamanhos?.brotinho?.preco || '',
+      precoGrande: item.tamanhos?.grande?.preco || ''
     });
     setEditandoId(item._id);
     setMostrarForm(true);
     setPreviewUrl('');
     setImagemFile(null);
-
-    setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 50);
   };
 
   const handleDelete = async (id) => {
@@ -198,26 +213,12 @@ const CardapioAdmin = () => {
   };
 
   const fecharForm = () => {
-    setMostrarForm(false);
-    setEditandoId(null);
-    setFormData({
-      nome: '',
-      descricao: '',
-      preco: '',
-      categoria: 'principais',
-      subcategoria: '',
-      destaque: false,
-      disponivel: true,
-      imagem: ''
-    });
-    setImagemFile(null);
-    setPreviewUrl('');
+    resetForm();
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <IoRestaurant className="text-4xl text-primary animate-pulse mr-2" />
         <div className="text-xl">Carregando cardápio...</div>
       </div>
     );
@@ -245,7 +246,9 @@ const CardapioAdmin = () => {
                 subcategoria: '',
                 destaque: false,
                 disponivel: true,
-                imagem: ''
+                imagem: '',
+                precoBrotinho: '',
+                precoGrande: ''
               });
               setImagemFile(null);
               setPreviewUrl('');
@@ -274,7 +277,7 @@ const CardapioAdmin = () => {
             placeholder="Buscar por nome, descrição ou categoria..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
-            className="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
           {termoBusca && (
             <button
@@ -367,9 +370,53 @@ const CardapioAdmin = () => {
                   <option value="principais">Pratos Principais</option>
                   <option value="bebidas">Bebidas</option>
                   <option value="sobremesas">Sobremesas</option>
+                  <option value="pizzas">Pizzas</option>
                 </select>
               </div>
             </div>
+
+            {/* CAMPOS DE TAMANHO PARA PIZZA */}
+            {formData.categoria === 'pizzas' && (
+              <div className="border rounded-lg p-4 bg-primary/5 border-primary/20">
+                <h3 className="font-bold mb-3 text-dark-bg flex items-center gap-2">
+                  Tamanhos da Pizza
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Brotinho (25cm - 4 fatias)
+                    </label>
+                    <input
+                      type="number"
+                      name="precoBrotinho"
+                      value={formData.precoBrotinho}
+                      onChange={handleChange}
+                      step="0.01"
+                      min="0"
+                      placeholder="Ex: 39.90"
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Deixe em branco se não disponível</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Grande (35cm - 8 fatias)
+                    </label>
+                    <input
+                      type="number"
+                      name="precoGrande"
+                      value={formData.precoGrande}
+                      onChange={handleChange}
+                      step="0.01"
+                      min="0"
+                      placeholder="Ex: 59.90"
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Deixe em branco se não disponível</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -410,11 +457,6 @@ const CardapioAdmin = () => {
                     src={formData.imagem} 
                     alt="Atual" 
                     className="w-32 h-32 object-cover rounded-lg border"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML = '<div class="w-32 h-32 bg-gray-200 rounded flex items-center justify-center"><FiImage class="text-gray-400 text-2xl" /></div>';
-                    }}
                   />
                   <p className="text-xs text-gray-500 mt-1">Imagem atual</p>
                 </div>
@@ -457,14 +499,8 @@ const CardapioAdmin = () => {
                 disabled={uploading}
                 className="bg-primary text-dark-bg px-4 py-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {uploading ? (
-                  'Enviando...'
-                ) : (
-                  <>
-                    <IoSave />
-                    {editandoId ? 'Atualizar' : 'Salvar'}
-                  </>
-                )}
+                {uploading ? 'Enviando...' : <IoSave />}
+                {uploading ? 'Enviando...' : (editandoId ? 'Atualizar' : 'Salvar')}
               </button>
               <button
                 type="button"
@@ -479,9 +515,9 @@ const CardapioAdmin = () => {
         </div>
       )}
 
-      {/* Lista de itens */}
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <table className="w-full">
+      {/* LISTA DE ITENS */}
+      <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
+        <table className="w-full min-w-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="p-3 text-left">Imagem</th>
@@ -489,6 +525,7 @@ const CardapioAdmin = () => {
               <th className="p-3 text-left">Nome</th>
               <th className="p-3 text-left">Categoria</th>
               <th className="p-3 text-left">Preço</th>
+              <th className="p-3 text-left">Pizza</th>
               <th className="p-3 text-left">Destaque</th>
               <th className="p-3 text-left">Ações</th>
             </tr>
@@ -502,11 +539,6 @@ const CardapioAdmin = () => {
                       src={item.imagem} 
                       alt={item.nome}
                       className="w-12 h-12 object-cover rounded"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.style.display = 'none';
-                        e.target.parentElement.innerHTML = '<div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"><FiImage class="text-gray-400" /></div>';
-                      }}
                     />
                   ) : (
                     <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
@@ -529,7 +561,19 @@ const CardapioAdmin = () => {
                 </td>
                 <td className="p-3 font-medium">{item.nome}</td>
                 <td className="p-3 capitalize">{item.categoria}</td>
-                <td className="p-3">R$ {item.preco.toFixed(2)}</td>
+                <td className="p-3">R$ {item.preco?.toFixed(2) || '0.00'}</td>
+                <td className="p-3">
+                  {item.categoria === 'pizzas' && item.tamanhos && (
+                    <div className="text-xs">
+                      {item.tamanhos.brotinho?.preco && (
+                        <div>Brotinho: R$ {item.tamanhos.brotinho.preco.toFixed(2)}</div>
+                      )}
+                      {item.tamanhos.grande?.preco && (
+                        <div>Grande: R$ {item.tamanhos.grande.preco.toFixed(2)}</div>
+                      )}
+                    </div>
+                  )}
+                </td>
                 <td className="p-3">
                   {item.destaque && <FiStar className="text-yellow-500" />}
                 </td>
@@ -537,14 +581,14 @@ const CardapioAdmin = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(item)}
-                      className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors"
+                      className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                       title="Editar"
                     >
                       <FiEdit />
                     </button>
                     <button
                       onClick={() => handleDelete(item._id)}
-                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors"
+                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                       title="Excluir"
                     >
                       <FiTrash2 />
@@ -560,20 +604,13 @@ const CardapioAdmin = () => {
           <div className="text-center py-12">
             {termoBusca ? (
               <>
-                <FiSearch className="text-5xl text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500 mb-2">Nenhum item encontrado para "{termoBusca}"</p>
-                <button
-                  onClick={limparBusca}
-                  className="text-primary hover:underline"
-                >
+                <button onClick={limparBusca} className="text-primary hover:underline">
                   Limpar busca
                 </button>
               </>
             ) : (
-              <>
-                <FiImage className="text-5xl text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Nenhum item cadastrado</p>
-              </>
+              <p className="text-gray-500">Nenhum item cadastrado</p>
             )}
           </div>
         )}

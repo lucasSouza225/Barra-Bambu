@@ -9,6 +9,11 @@ import {
   MdRestaurantMenu, MdAdd 
 } from 'react-icons/md';
 import { FaUtensils } from 'react-icons/fa';
+// NOVOS IMPORTS
+import { usePizza } from '../hooks/usePizza';
+import SeletorTamanhoPizza from '../components/pizza/SeletorTamanhoPizza';
+import { isPizza, getPrecoBasePizza } from '../utils/pizzaUtils';
+import { formatarPreco } from '../utils/formatters';
 
 const CardapioPublico = () => {
   const [itens, setItens] = useState([]);
@@ -18,22 +23,29 @@ const CardapioPublico = () => {
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [quantidade, setQuantidade] = useState(1);
   const [observacao, setObservacao] = useState('');
-  
-  // NOVO: Estado para mensagem de confirmação
   const [mensagemConfirmacao, setMensagemConfirmacao] = useState(null);
 
   const { adicionarItem } = useCarrinho();
 
-  // Categorias para os botões
+  // HOOK PARA PIZZA
+  const {
+    tamanhoSelecionado,
+    precoAtual: precoPizzaAtual,
+    isItemPizza,
+    temTamanhos,
+    handleTamanhoChange,
+    resetTamanho
+  } = usePizza(itemSelecionado, modalAberto);
+
   const categorias = [
     { id: 'todos', nome: 'Todos', icon: <MdRestaurantMenu /> },
     { id: 'entradas', nome: 'Entradas', icon: <FaUtensils /> },
     { id: 'principais', nome: 'Pratos Principais', icon: <IoRestaurant /> },
+    { id: 'pizzas', nome: 'Pizzas', icon: <IoRestaurant /> },
     { id: 'bebidas', nome: 'Bebidas', icon: <IoWine /> },
     { id: 'sobremesas', nome: 'Sobremesas', icon: <IoIceCream /> },
   ];
 
-  // Configuração das seções
   const categoriasConfig = {
     entradas: { 
       nome: 'Entradas', 
@@ -42,6 +54,11 @@ const CardapioPublico = () => {
     },
     principais: { 
       nome: 'Pratos Principais', 
+      icon: <IoRestaurant className="text-xl text-primary" />,
+      borderColor: 'border-primary'
+    },
+    pizzas: { 
+      nome: 'Pizzas', 
       icon: <IoRestaurant className="text-xl text-primary" />,
       borderColor: 'border-primary'
     },
@@ -57,12 +74,11 @@ const CardapioPublico = () => {
     }
   };
 
-  // NOVO: Função para mostrar mensagem de confirmação
   const mostrarConfirmacao = (nomeItem, quantidadeItem) => {
     setMensagemConfirmacao({ nome: nomeItem, quantidade: quantidadeItem });
     setTimeout(() => {
       setMensagemConfirmacao(null);
-    }, 3000); // Mensagem some após 3 segundos
+    }, 3000);
   };
 
   useEffect(() => {
@@ -94,7 +110,6 @@ const CardapioPublico = () => {
     });
   }
 
-  // Itens filtrados
   const itensFiltrados = categoriaAtiva !== 'todos'
     ? itens.filter(item => item.categoria === categoriaAtiva)
     : [];
@@ -103,25 +118,31 @@ const CardapioPublico = () => {
     setItemSelecionado(item);
     setQuantidade(1);
     setObservacao('');
+    resetTamanho(); // Reseta o tamanho da pizza
     setModalAberto(true);
   };
 
   const handleAdicionarAoCarrinho = () => {
+    // Usa o preço da pizza se for pizza, senão usa o preço normal
+    const precoFinal = isItemPizza ? precoPizzaAtual : itemSelecionado.preco;
+    
     adicionarItem({
       ...itemSelecionado,
+      preco: precoFinal,
+      ...(isItemPizza && temTamanhos && { tamanho: tamanhoSelecionado }),
       observacao: observacao
     }, quantidade);
-    setModalAberto(false);
     
-    // NOVO: Mostrar mensagem de confirmação
+    setModalAberto(false);
     mostrarConfirmacao(itemSelecionado.nome, quantidade);
   };
 
-  const formatarPreco = (preco) => {
-    return preco.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
+  // Função para exibir o preço correto no card
+  const getPrecoExibicao = (item) => {
+    if (isPizza(item) && item.tamanhos?.grande?.preco) {
+      return `a partir de ${formatarPreco(item.tamanhos.grande.preco)}`;
+    }
+    return formatarPreco(item.preco);
   };
 
   if (loading) {
@@ -210,6 +231,13 @@ const CardapioPublico = () => {
                               Destaque
                             </div>
                           )}
+                          
+                          {/* Badge para pizza */}
+                          {item.categoria === 'pizzas' && (
+                            <div className="absolute top-3 left-3 bg-primary text-dark-bg text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
+                              Pizza
+                            </div>
+                          )}
                         </div>
 
                         <div className="p-4">
@@ -223,7 +251,7 @@ const CardapioPublico = () => {
 
                           <div className="flex justify-between items-center">
                             <span className="text-lg md:text-xl font-bold text-primary">
-                              {formatarPreco(item.preco)}
+                              {getPrecoExibicao(item)}
                             </span>
                             <button
                               onClick={() => abrirModal(item)}
@@ -270,6 +298,12 @@ const CardapioPublico = () => {
                       Destaque
                     </div>
                   )}
+                  
+                  {item.categoria === 'pizzas' && (
+                    <div className="absolute top-3 left-3 bg-primary text-dark-bg text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
+                      Pizza
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4">
@@ -283,7 +317,7 @@ const CardapioPublico = () => {
 
                   <div className="flex justify-between items-center">
                     <span className="text-lg md:text-xl font-bold text-primary">
-                      {formatarPreco(item.preco)}
+                      {getPrecoExibicao(item)}
                     </span>
                     <button
                       onClick={() => abrirModal(item)}
@@ -299,7 +333,6 @@ const CardapioPublico = () => {
           </div>
         )}
 
-        {/* Mensagem quando não tem itens */}
         {categoriaAtiva !== 'todos' && itensFiltrados.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
@@ -309,7 +342,7 @@ const CardapioPublico = () => {
         )}
       </div>
 
-      {/* MODAL DE QUANTIDADE */}
+      {/* MODAL DE QUANTIDADE E TAMANHO */}
       {modalAberto && itemSelecionado && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
@@ -317,6 +350,16 @@ const CardapioPublico = () => {
               {itemSelecionado.nome}
             </h3>
 
+            {/* SELETOR DE TAMANHO (só para pizzas) */}
+            {isItemPizza && temTamanhos && (
+              <SeletorTamanhoPizza
+                item={itemSelecionado}
+                tamanhoSelecionado={tamanhoSelecionado}
+                onTamanhoChange={handleTamanhoChange}
+              />
+            )}
+
+            {/* Quantidade */}
             <div className="mb-4">
               <label className="block text-gray-700 mb-2">Quantidade</label>
               <div className="flex items-center gap-4">
@@ -338,6 +381,7 @@ const CardapioPublico = () => {
               </div>
             </div>
 
+            {/* Observações */}
             <div className="mb-4">
               <label className="block text-gray-700 mb-2">
                 Observações (opcional)
@@ -351,13 +395,15 @@ const CardapioPublico = () => {
               />
             </div>
 
+            {/* Total */}
             <div className="flex justify-between items-center mb-4">
               <span className="text-gray-600">Total:</span>
               <span className="text-2xl font-bold text-primary">
-                {formatarPreco(itemSelecionado.preco * quantidade)}
+                {formatarPreco((isItemPizza ? precoPizzaAtual : itemSelecionado.preco) * quantidade)}
               </span>
             </div>
 
+            {/* Botões */}
             <div className="flex gap-2">
               <button
                 onClick={handleAdicionarAoCarrinho}
@@ -376,18 +422,17 @@ const CardapioPublico = () => {
         </div>
       )}
 
-      {/* NOVO: MENSAGEM DE CONFIRMAÇÃO (TOAST) */}
+      {/* TOAST DE CONFIRMAÇÃO */}
       {mensagemConfirmacao && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-up">
           <div className="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3">
             <FiCheck className="text-xl" />
             <span>
-              Adicionado ao carrinho!
+              {mensagemConfirmacao.quantidade}x {mensagemConfirmacao.nome} adicionado ao carrinho!
             </span>
           </div>
         </div>
       )}
-     
     </div>
   );
 };

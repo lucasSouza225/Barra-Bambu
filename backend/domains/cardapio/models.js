@@ -14,14 +14,43 @@ const cardapioSchema = new Schema({
         required: [true, "Preço é obrigatório"],
         min: [0, "Preço não pode ser negativo"]
     },
+    // NOVO: Campo para tamanhos de pizza
+    tamanhos: {
+        brotinho: {
+            preco: { 
+                type: Number, 
+                default: 0,
+                min: [0, "Preço não pode ser negativo"]
+            },
+            disponivel: { 
+                type: Boolean, 
+                default: true 
+            }
+        },
+        grande: {
+            preco: { 
+                type: Number, 
+                default: 0,
+                min: [0, "Preço não pode ser negativo"]
+            },
+            disponivel: { 
+                type: Boolean, 
+                default: true 
+            }
+        }
+    },
     categoria: { 
         type: String, 
-        enum: ['entradas', 'principais', 'bebidas', 'sobremesas'], 
+        enum: ['entradas', 'principais', 'bebidas', 'sobremesas', 'carnes', 'peixes', 'petiscos', 'pizzas'],
         required: [true, "Categoria é obrigatória"]
+    },
+    subcategoria: { 
+        type: String, 
+        default: '' 
     },
     imagem: { 
         type: String,
-        default: '' 
+        default: ''
     },
     disponivel: { 
         type: Boolean, 
