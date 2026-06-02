@@ -165,6 +165,10 @@ const CardapioAdmin = () => {
     setMostrarForm(true);
     setPreviewUrl('');
     setImagemFile(null);
+
+    setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 50);
   };
 
   const handleDelete = async (id) => {
