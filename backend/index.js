@@ -19,9 +19,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-    origin: 'https://frontend-jg7gh2uha-lucas-projects225.vercel.app',
+    origin: 'http://localhost:5173',
     credentials: true
 }));
+/* app.use(cors({
+    origin: 'https://frontend-jg7gh2uha-lucas-projects225.vercel.app',
+    credentials: true
+})); */
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use("/users", UserRouter)
