@@ -22,14 +22,12 @@ app.use(cookieParser());
     origin: 'http://localhost:5173',
     credentials: true
 })); */
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://frontend-gules-two-70.vercel.app',
-    'https://frontend-axfbp6hai-lucas-projects225.vercel.app'
-  ],
-  credentials: true
-}));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://frontend-naia22urs-lucas-projects225.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use("/users", UserRouter)
