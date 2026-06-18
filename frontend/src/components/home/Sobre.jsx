@@ -13,7 +13,7 @@ const Sobre = () => {
               <img 
                 src={welcomeImg} 
                 alt="Bem-vindo ao Barra Bambu" 
-                className="w-full h-auto rounded-lg "
+                className="w-130 h-auto rounded-lg "
               />
               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/20 rounded-full -z-10"></div>
             </div>
@@ -47,7 +47,7 @@ const Sobre = () => {
             <div className="flex gap-4 pt-4">
               <a 
                 href="#" 
-                className="social-icon w-12 h-12 bg-[#719A0A] hover:bg-[#38241B] text-primary hover:text-[#FFD301] rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110"
+                className="social-icon w-12 h-12 bg-[#FFD301] hover:bg-[#719A0A] text-dark-bg hover:text-[#38241B] rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110"
                 aria-label="Facebook"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
@@ -57,7 +57,7 @@ const Sobre = () => {
               
               <a 
                 href="#" 
-                className="social-icon w-12 h-12 bg-[#719A0A] hover:bg-[#38241B] text-primary hover:text-[#FFD301] rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110"
+                className="social-icon w-12 h-12 bg-[#FFD301] hover:bg-[#719A0A] text-dark-bg rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110"
                 aria-label="Instagram"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
@@ -67,7 +67,7 @@ const Sobre = () => {
               
               <a 
                 href="#" 
-                className="social-icon w-12 h-12 bg-[#719A0A] hover:bg-[#38241B] text-primary hover:text-[#FFD301] rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110"
+                className="social-icon w-12 h-12 bg-[#FFD301] hover:bg-[#719A0A] text-dark-bg rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110"
                 aria-label="WhatsApp"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">

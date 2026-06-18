@@ -62,7 +62,7 @@ const Header = () => {
           <img 
             src={logo} 
             alt="Logo" 
-            className="w-32 md:w-48 cursor-pointer hover:opacity-80 transition-opacity" 
+            className="w-25 md:w-29 cursor-pointer hover:opacity-80 transition-opacity" 
           />
         </Link>
 
@@ -83,7 +83,7 @@ const Header = () => {
                 <a 
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
-                  className="text-[#969696] hover:text-[#FFD301] transition-colors duration-300 relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-[#FFD301] after:w-0 hover:after:w-full after:transition-all after:duration-300 px-2 py-1 cursor-pointer"
+                  className="text-[#c8c8c8] hover:text-[#FFD301] transition-colors duration-300 relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-[#FFD301] after:w-0 hover:after:w-full after:transition-all after:duration-300 px-2 py-1 cursor-pointer"
                 >
                   {item.label}
                 </a>

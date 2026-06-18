@@ -104,14 +104,14 @@ const Reserva = () => {
   return (
     <section id="reserva" className="p-5 bg-light-bg relative">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-12.5 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center">
 
           {/* Imagem */}
           <div className="reservation-image order-first lg:order-first">
             <img
               src={reservationImg}
               alt="Faça sua reserva"
-              className="w-full rounded-lg shadow-2xl"
+              className="w-110 rounded-lg shadow-2xl"
             />
           </div>
 
