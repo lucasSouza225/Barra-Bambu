@@ -171,7 +171,7 @@ const LayoutAdmin = ({ user, setUser }) => {
           <div className="mb-8 flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-dark-bg">
-                Bem-vindo, {user?.name?.split(' ')[0] || 'Admin'}! 👋
+                Bem-vindo, {user?.name?.split(' ')[0] || 'Admin'}!
               </h1>
               <p className="text-gray-500 text-sm mt-1">
                 Gerencie todo o conteúdo do Barra Bambu
